@@ -1,80 +1,115 @@
 // playbook.js
 
-// Define the field zones for the filtering feature
-// These are based on the SVG viewBox="0 0 650 600"
-const ZONES = {
-    "flat_left": { x: 0, y: 250, width: 150, height: 100 },
-    "flat_right": { x: 500, y: 250, width: 150, height: 100 },
-    "intermediate_left": { x: 0, y: 125, width: 220, height: 125 },
-    "intermediate_middle": { x: 220, y: 125, width: 210, height: 125 },
-    "intermediate_right": { x: 430, y: 125, width: 220, height: 125 },
-    "deep_left": { x: 0, y: 0, width: 325, height: 125 },
-    "deep_right": { x: 325, y: 0, width: 325, height: 125 },
-};
+/*
+  VERSION 2.0 PLAYBOOK STRUCTURE
+  This file now defines a "defaultPlaybook". The app will load this on first run,
+  but it can be replaced by a user-uploaded JSON file.
 
-const PLAYBOOK = {
+  NEW CONCEPTS:
+  - routeLibrary: A master list of all possible routes. This avoids repetition
+    and is the key to building custom plays later.
+  - plays: Now just contain metadata and 'assignments' which map a player (e.g., 'X')
+    to a key from the routeLibrary (e.g., 'go').
+  - defenses: A list of defensive formations for the UI.
+*/
+
+const defaultPlaybook = {
+  // Master library of all routes. Plays will reference these keys.
+  routeLibrary: {
+    'go': { name: 'Go', path: 'M 0 0 V -220' },
+    'post': { name: 'Post', path: 'M 0 0 L 80 -160' },
+    'corner': { name: 'Corner', path: 'M 0 0 L -80 -160' },
+    'out': { name: 'Out', path: 'M 0 0 V -80 H 100' },
+    'in': { name: 'In', path: 'M 0 0 V -80 H -100' },
+    'slant': { name: 'Slant', path: 'M 0 0 L -60 -60' },
+    'flat': { name: 'Flat', path: 'M 0 0 C 20 -5, 40 -5, 60 0 H 100' },
+    'shallow': { name: 'Shallow Cross', path: 'M 0 0 C 100 -20, 250 -20, 400 0' },
+    'deepCross': { name: 'Deep Cross', path: 'M 0 0 C 150 -150, 300 -180, 400 -180' },
+    'comeback': { name: 'Comeback', path: 'M 0 0 V -120 L -20 -100' },
+    'block': { name: 'Block', path: '' }, // Empty path for blocking assignment
+    'swingR': { name: 'Swing Right', path: 'M 0 0 C 50 30, 150 30, 200 10' },
+    'swingL': { name: 'Swing Left', path: 'M 0 0 C -50 30, -150 30, -200 10' },
+    'screen': { name: 'Screen', path: 'M 0 0 L 20 20' }
+  },
+
+  // List of all formations with player coordinates.
   formations: {
     "Trips Lt": {
-      X: { x: 100, y: 350 }, F: { x: 180, y: 350 }, Y: { x: 260, y: 350 },
-      C: { x: 450, y: 360 }, Z: { x: 550, y: 350 }, H: { x: 400, y: 420 },
-      Q: { x: 400, y: 500 },
-    },
-    "Trips Rt": {
-      X: { x: 100, y: 350 }, C: { x: 200, y: 360 }, Y: { x: 370, y: 350 },
-      F: { x: 450, y: 350 }, Z: { x: 530, y: 350 }, H: { x: 250, y: 420 },
-      Q: { x: 250, y: 500 },
-    },
-    "Divide Lt": {
-      X: { x: 100, y: 350 }, Y: { x: 180, y: 350 }, C: { x: 325, y: 360 },
-      F: { x: 470, y: 350 }, Z: { x: 550, y: 350 }, H: { x: 325, y: 450 },
-      Q: { x: 325, y: 500 },
+      X: { x: 100, y: 380 }, F: { x: 180, y: 380 }, Y: { x: 260, y: 380 },
+      C: { x: 450, y: 390 }, Z: { x: 600, y: 380 }, H: { x: 400, y: 450 }, Q: { x: 400, y: 500 },
     },
     "Divide Rt": {
-      X: { x: 100, y: 350 }, F: { x: 180, y: 350 }, C: { x: 325, y: 360 },
-      Y: { x: 470, y: 350 }, Z: { x: 550, y: 350 }, H: { x: 325, y: 450 },
-      Q: { x: 325, y: 500 },
+      X: { x: 100, y: 380 }, F: { x: 180, y: 380 }, C: { x: 350, y: 390 },
+      Y: { x: 520, y: 380 }, Z: { x: 600, y: 380 }, H: { x: 350, y: 450 }, Q: { x: 350, y: 500 },
     },
-    // TODO: Add "Empty Lt/Rt", "Bunch Lt/Rt" here
+    "Bunch Rt": {
+      X: { x: 100, y: 380 }, C: { x: 350, y: 390 }, Y: { x: 550, y: 380 },
+      F: { x: 580, y: 400 }, Z: { x: 610, y: 380 }, H: { x: 350, y: 450 }, Q: { x: 350, y: 500 },
+    },
+    "Empty Lt": {
+      X: { x: 50, y: 380 }, F: { x: 130, y: 380 }, Y: { x: 210, y: 380 },
+      C: { x: 350, y: 390 }, H: { x: 490, y: 380 }, Z: { x: 570, y: 380 }, Q: { x: 350, y: 500 },
+    }
+    // TODO: Add Trips Rt, Divide Lt, Bunch Lt, Empty Rt
   },
 
+  // List of all plays with metadata and route assignments.
   plays: {
-    "Flood": { // From R. Flood.pdf
-      X: { path: "M 0 0 V -180", color: "blue", zoneTargets: ["deep_left"] },
-      F: { path: "M 0 0 L 100 -100", color: "black", zoneTargets: ["intermediate_right"] },
-      Y: { path: "M 0 0 C 50 -10, 80 -30, 100 -50", color: "deeppink", zoneTargets: ["flat_right"] },
-      Z: { path: "M 0 0 C 80 -150, 20 -200, 0 -220", color: "red", zoneTargets: ["deep_right"]},
-      C: { path: "M 0 0 q 0 -20, 15 -30", color: "grey" },
-      H: { path: "M 0 0 q 0 20, -15 30", color: "grey" },
-      Q: { path: "M 0 0 C -50 30, -150 30, -200 10", color: "grey" },
+    "Flood": {
+      name: "Flood",
+      description: "Overloads one side of the field with routes at different depths.",
+      strongAgainst: ["Cover 3", "Zone"],
+      assignments: {
+        X: 'go', Y: 'flat', F: 'out', Z: 'post', H: 'swingL', C: 'block', Q: 'block'
+      },
+      routeColors: { X: '#ff453a', Z: '#ff453a' } // Example of custom coloring
     },
-    "Crossers": { // From R. Divide Crossers.pdf
-      X: { path: "M 0 0 C 100 -20, 350 -20, 500 0", color: "blue", zoneTargets: ["intermediate_left", "intermediate_middle", "intermediate_right"]},
-      Y: { path: "M 0 0 C 150 -150, 300 -180, 400 -180", color: "deeppink", zoneTargets: ["deep_right"]},
-      F: { path: "M 0 0 C -50 -80, -150 -90, -250 -80", color: "black", zoneTargets: ["intermediate_left"]},
-      Z: { path: "M 0 0 C 50 -200, -150 -250, -350 -220", color: "red", zoneTargets: ["deep_left"]},
-      C: { path: "M 0 0 q 0 -20, 15 -30", color: "grey" },
-      H: { path: "M 0 0 q 0 20, 15 30", color: "grey" },
-      Q: { path: "M 0 0 C 50 30, 150 30, 200 10", color: "grey" },
+    "Shallows": {
+      name: "Shallow Cross",
+      description: "Two receivers cross at shallow depth, creating a natural pick.",
+      strongAgainst: ["Man", "Cover 1"],
+      assignments: {
+        X: 'post', Y: 'shallow', F: 'in', Z: 'go', H: 'swingR', C: 'block', Q: 'block'
+      }
     },
-    // TODO: Add "Shallows", "Stupid", "Screens", etc. here
+    "Crossers": {
+        name: "Crossers",
+        description: "Multiple receivers run deep crossing routes.",
+        strongAgainst: ["Zone", "Cover 3"],
+        assignments: {
+            X: 'deepCross', Y: 'post', F: 'in', Z: 'go', H: 'flat', C: 'block', Q: 'block'
+        }
+    },
+    "Screens": {
+        name: "Jailbreak Screen",
+        description: "Quick throw to a receiver with blockers in front.",
+        strongAgainst: ["Blitz", "Man"],
+        assignments: {
+            X: 'block', Y: 'screen', F: 'block', Z: 'go', H: 'go', C: 'block', Q: 'block'
+        }
+    }
+  },
+
+  // Available defensive formations for the recommendation engine.
+  defenses: [
+    "Cover 1", "Cover 2", "Cover 3", "Man", "Zone", "Blitz"
+  ],
+
+  // Modifiers can override a player's assignment
+  modifiers: {
+    "Max": { F: 'block' } // "Max" modifier makes F a blocker
   },
   
-  modifiers: {
-      "Max": ["F"],
-  },
-
+  // Hand signals can be linked to formations or plays
   handSignals: {
-    // NOTE: Replace these with the actual paths to your images in the `signals` folder.
     formations: {
         "Trips": "signals/trips_signal.png",
         "Divide": "signals/divide_signal.png",
-        "Empty": "signals/empty_signal.png",
-        "Bunch": "signals/bunch_signal.png",
     },
     plays: {
-        "Crossers": "signals/crossers_signal.png",
         "Flood": "signals/flood_signal.png",
         "Shallows": "signals/shallows_signal.png",
     }
   }
 };
+

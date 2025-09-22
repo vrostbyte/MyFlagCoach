@@ -1,233 +1,273 @@
 // app.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- STATE MANAGEMENT ---
+    // --- APPLICATION STATE ---
+    let playbook = null;
+    let selectedDefense = null;
     let selectedFormation = null;
     let selectedPlay = null;
-    let selectedModifier = null;
-    let activeZoneFilter = null;
 
     // --- DOM ELEMENT REFERENCES ---
-    const formationButtonsContainer = document.getElementById('formation-buttons');
-    const playButtonsContainer = document.getElementById('play-buttons');
-    const modifierButtonsContainer = document.getElementById('modifier-buttons');
-    const defensiveZonesContainer = document.getElementById('defensive-zones');
+    const defenseSelector = document.getElementById('defense-selector');
+    const formationSelector = document.getElementById('formation-selector');
+    const playSelector = document.getElementById('play-selector');
     const playDrawingContainer = document.getElementById('play-drawing');
     const signalDisplayContainer = document.getElementById('signal-display');
-    const currentPlayDisplay = document.getElementById('current-play-display');
-
+    const currentPlayTitle = document.getElementById('current-play-title');
+    const playbookUpload = document.getElementById('playbook-upload');
+    const resetPlaybookBtn = document.getElementById('reset-playbook');
+    const recommendedPlaysSection = document.getElementById('recommended-plays-section');
     const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
     // --- INITIALIZATION ---
     function initializeApp() {
-        createButtons(Object.keys(PLAYBOOK.formations), formationButtonsContainer, handleFormationSelect);
-        createButtons(Object.keys(PLAYBOOK.plays), playButtonsContainer, handlePlaySelect);
-        createButtons(Object.keys(PLAYBOOK.modifiers), modifierButtonsContainer, handleModifierSelect);
-        drawDefensiveZones();
-        initializeCanvas();
-        updateDisplay();
+        loadPlaybook();
+        renderControls();
+        addEventListeners();
+    }
+
+    // --- PLAYBOOK MANAGEMENT ---
+    function loadPlaybook() {
+        const savedPlaybook = localStorage.getItem('customPlaybook');
+        if (savedPlaybook) {
+            playbook = JSON.parse(savedPlaybook);
+        } else {
+            playbook = defaultPlaybook;
+        }
+    }
+
+    function savePlaybook() {
+        localStorage.setItem('customPlaybook', JSON.stringify(playbook));
+    }
+
+    function handlePlaybookUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const newPlaybook = JSON.parse(e.target.result);
+                playbook = newPlaybook;
+                savePlaybook();
+                resetSelections();
+                renderControls();
+            } catch (error) {
+                alert('Error parsing playbook file. Please ensure it is a valid JSON file.');
+                console.error("Playbook parsing error:", error);
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    function handleResetPlaybook() {
+        if (confirm('Are you sure you want to reset to the default playbook? This will erase your uploaded playbook.')) {
+            localStorage.removeItem('customPlaybook');
+            playbook = defaultPlaybook;
+            resetSelections();
+            renderControls();
+        }
+    }
+    
+    function resetSelections() {
+        selectedDefense = null;
+        selectedFormation = null;
+        selectedPlay = null;
+        updateUI();
+    }
+
+    // --- UI RENDERING ---
+    function renderControls() {
+        renderSelector('defense', playbook.defenses, defenseSelector, handleDefenseSelect);
+        renderSelector('formation', Object.keys(playbook.formations), formationSelector, handleFormationSelect);
+        updateUI(); // Initial UI update
+    }
+
+    function renderSelector(type, items, container, handler) {
+        container.innerHTML = '';
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'selector-btn';
+            btn.textContent = item;
+            btn.dataset.type = type;
+            btn.dataset.value = item;
+            btn.addEventListener('click', () => handler(item, btn));
+            container.appendChild(btn);
+        });
+    }
+
+    function updateUI() {
+        // Update active buttons
+        updateActiveButton('defense', selectedDefense, defenseSelector);
+        updateActiveButton('formation', selectedFormation, formationSelector);
+
+        // Filter and render plays
+        const playsToRender = getFilteredPlays();
+        renderPlays(playsToRender);
+        updateActiveButton('play', selectedPlay, playSelector);
+
+        // Draw the selected play
+        drawPlay();
+
+        // Update titles and signals
+        updateHeader();
+        updateSignalDisplay();
+    }
+
+    function updateActiveButton(type, selectedValue, container) {
+        container.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
+            if (btn.dataset.value === selectedValue) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    function renderPlays(playNames) {
+        playSelector.innerHTML = '';
+        if (playNames.length === 0) {
+            recommendedPlaysSection.style.display = 'none';
+            return;
+        }
+        recommendedPlaysSection.style.display = 'block';
+        playNames.forEach(playName => {
+            const play = playbook.plays[playName];
+            const btn = document.createElement('button');
+            btn.className = 'selector-btn';
+            btn.textContent = play.name;
+            btn.dataset.type = 'play';
+            btn.dataset.value = playName;
+            btn.addEventListener('click', () => handlePlaySelect(playName, btn));
+            playSelector.appendChild(btn);
+        });
     }
 
     // --- EVENT HANDLERS ---
-    function handleFormationSelect(formationName) {
-        selectedFormation = formationName;
-        drawPlay();
+    function addEventListeners() {
+        playbookUpload.addEventListener('change', handlePlaybookUpload);
+        resetPlaybookBtn.addEventListener('click', handleResetPlaybook);
     }
 
-    function handlePlaySelect(playName) {
-        selectedPlay = playName;
-        drawPlay();
+  	function handleDefenseSelect(defense, btn) {
+        selectedDefense = selectedDefense === defense ? null : defense;
+        selectedPlay = null; // Reset play selection when defense changes
+        updateUI();
+    }
+    
+    function handleFormationSelect(formation, btn) {
+        selectedFormation = selectedFormation === formation ? null : formation;
+        selectedPlay = null; // Reset play selection when formation changes
+        updateUI();
+    }
+    
+    function handlePlaySelect(playName, btn) {
+        selectedPlay = selectedPlay === playName ? null : playName;
+        updateUI();
     }
 
-    function handleModifierSelect(modifierName, btn) {
-        if (selectedModifier === modifierName) {
-            selectedModifier = null;
-            btn.classList.remove('active');
-        } else {
-            // Deactivate other modifier buttons if any
-            modifierButtonsContainer.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            selectedModifier = modifierName;
+    // --- LOGIC & DRAWING ---
+    function getFilteredPlays() {
+        if (!selectedDefense) {
+            return Object.keys(playbook.plays); // Return all plays if no defense is selected
         }
-        drawPlay();
+        return Object.keys(playbook.plays).filter(playName => {
+            const play = playbook.plays[playName];
+            return play.strongAgainst && play.strongAgainst.includes(selectedDefense);
+        });
     }
-
-    // --- DRAWING & DISPLAY LOGIC ---
-    function initializeCanvas() {
-        playDrawingContainer.innerHTML = ''; // Clear only the play drawing, not zones
-        const line = document.createElementNS(SVG_NAMESPACE, 'line');
-        line.setAttribute('x1', '0');
-        line.setAttribute('y1', '350');
-        line.setAttribute('x2', '650');
-        line.setAttribute('y2', '350');
-        line.setAttribute('stroke', '#333');
-        line.setAttribute('stroke-width', '2');
-        playDrawingContainer.appendChild(line);
-    }
-
+    
     function drawPlay() {
-        initializeCanvas();
-        if (!selectedFormation || !selectedPlay) {
-            updateDisplay();
-            updateSignalDisplay();
-            return;
-        }
+        playDrawingContainer.innerHTML = ''; // Clear canvas
+        
+        // Draw Line of Scrimmage
+        const line = document.createElementNS(SVG_NAMESPACE, 'line');
+        line.setAttribute('x1', '0'); line.setAttribute('y1', '385');
+        line.setAttribute('x2', '700'); line.setAttribute('y2', '385');
+        line.setAttribute('stroke', '#ffffff'); line.setAttribute('stroke-width', '3');
+        playDrawingContainer.appendChild(line);
 
-        const formationData = PLAYBOOK.formations[selectedFormation];
-        const playData = PLAYBOOK.plays[selectedPlay];
-        const blockers = selectedModifier ? PLAYBOOK.modifiers[selectedModifier] : [];
+        if (!selectedFormation || !selectedPlay) return;
+
+        const formationData = playbook.formations[selectedFormation];
+        const playData = playbook.plays[selectedPlay];
 
         for (const player in formationData) {
-            if (!formationData.hasOwnProperty(player)) continue;
-
             const pos = formationData[player];
-            const route = playData[player];
-            const isBlocker = blockers.includes(player);
-            
+            const routeKey = playData.assignments[player];
+            if (!routeKey) continue;
+
+            const routeData = playbook.routeLibrary[routeKey];
             const playerGroup = document.createElementNS(SVG_NAMESPACE, 'g');
             playerGroup.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
 
+            // Draw player
             const playerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
-            playerCircle.setAttribute('r', '15');
-            playerCircle.setAttribute('fill', isBlocker ? '#ffc107' : 'white');
-            playerCircle.setAttribute('stroke', 'black');
-            playerCircle.setAttribute('stroke-width', '2');
+            playerCircle.setAttribute('r', '18');
+            playerCircle.setAttribute('class', 'player-circle');
             
             const playerLabel = document.createElementNS(SVG_NAMESPACE, 'text');
-            playerLabel.setAttribute('text-anchor', 'middle');
-            playerLabel.setAttribute('dy', '.3em');
-            playerLabel.setAttribute('font-size', '16');
-            playerLabel.setAttribute('font-weight', 'bold');
+            playerLabel.setAttribute('dy', '.35em');
+            playerLabel.setAttribute('class', 'player-label');
             playerLabel.textContent = player;
             
             playerGroup.appendChild(playerCircle);
             playerGroup.appendChild(playerLabel);
 
-            if (route && !isBlocker) {
+            // Draw route
+            if (routeKey !== 'block') {
                 const routePath = document.createElementNS(SVG_NAMESPACE, 'path');
-                routePath.setAttribute('d', route.path);
-                routePath.setAttribute('stroke', route.color || 'black');
-                routePath.setAttribute('stroke-width', '3');
-                routePath.setAttribute('fill', 'none');
+                routePath.setAttribute('d', routeData.path);
+                routePath.setAttribute('class', 'route-path');
+                const customColor = playData.routeColors && playData.routeColors[player];
+                routePath.setAttribute('stroke', customColor || '#f9d423');
                 playerGroup.appendChild(routePath);
+            } else {
+                 playerCircle.style.fill = '#8e8e93'; // Make blockers grey
             }
-            
-            if (isBlocker) {
-                const blockSymbol = document.createElementNS(SVG_NAMESPACE, 'rect');
-                blockSymbol.setAttribute('x', '-10');
-                blockSymbol.setAttribute('y', '-25');
-                blockSymbol.setAttribute('width', '20');
-                blockSymbol.setAttribute('height', '5');
-                blockSymbol.setAttribute('fill', 'black');
-                playerGroup.appendChild(blockSymbol);
-            }
+
             playDrawingContainer.appendChild(playerGroup);
         }
-        updateDisplay();
-        updateSignalDisplay();
     }
-    
-    function updateDisplay() {
-        let text = 'SELECT FORMATION & PLAY';
+
+    function updateHeader() {
         if (selectedFormation && selectedPlay) {
-            text = `${selectedFormation} > ${selectedPlay}`;
-            if (selectedModifier) {
-                text += ` > ${selectedModifier}`;
-            }
+            currentPlayTitle.textContent = `${selectedFormation} - ${playbook.plays[selectedPlay].name}`;
         } else if (selectedFormation) {
-            text = `${selectedFormation} > ...`;
+            currentPlayTitle.textContent = `${selectedFormation}`;
+        } else {
+            currentPlayTitle.textContent = 'Select a Formation and Play';
         }
-        currentPlayDisplay.textContent = text;
     }
 
     function updateSignalDisplay() {
         signalDisplayContainer.innerHTML = 'No Signals';
+        if (!playbook.handSignals) return;
+
         const signals = [];
         if (selectedFormation) {
-            const formationBase = selectedFormation.split(' ')[0];
-            const signalPath = PLAYBOOK.handSignals.formations[formationBase];
-            if (signalPath) signals.push(signalPath);
+            const baseFormation = selectedFormation.split(' ')[0];
+            const path = playbook.handSignals.formations?.[baseFormation];
+            if(path) signals.push(path);
         }
         if (selectedPlay) {
-            const signalPath = PLAYBOOK.handSignals.plays[selectedPlay];
-            if (signalPath) signals.push(signalPath);
+            const path = playbook.handSignals.plays?.[selectedPlay];
+            if(path) signals.push(path);
         }
+
         if (signals.length > 0) {
             signalDisplayContainer.innerHTML = '';
             signals.forEach(path => {
                 const img = document.createElement('img');
                 img.src = path;
                 img.alt = "Hand Signal";
-                // Handle image loading errors gracefully
-                img.onerror = () => { img.style.display = 'none'; };
+                img.onerror = () => img.style.display = 'none'; // Hide if image is missing
                 signalDisplayContainer.appendChild(img);
             });
         }
     }
 
-    // --- DEFENSIVE ZONE & FILTERING LOGIC ---
-    function drawDefensiveZones() {
-        defensiveZonesContainer.innerHTML = '';
-        for (const zoneId in ZONES) {
-            const zone = ZONES[zoneId];
-            const zoneRect = document.createElementNS(SVG_NAMESPACE, 'rect');
-            zoneRect.setAttribute('class', 'zone');
-            zoneRect.setAttribute('id', zoneId);
-            zoneRect.setAttribute('x', zone.x);
-            zoneRect.setAttribute('y', zone.y);
-            zoneRect.setAttribute('width', zone.width);
-            zoneRect.setAttribute('height', zone.height);
-            zoneRect.addEventListener('click', () => toggleZoneFilter(zoneId, zoneRect));
-            defensiveZonesContainer.appendChild(zoneRect);
-        }
-    }
-
-    function toggleZoneFilter(zoneId, zoneRect) {
-        if (activeZoneFilter === zoneId) {
-            activeZoneFilter = null;
-            zoneRect.classList.remove('active-filter');
-        } else {
-            activeZoneFilter = zoneId;
-            document.querySelectorAll('.zone').forEach(z => z.classList.remove('active-filter'));
-            zoneRect.classList.add('active-filter');
-        }
-        filterPlayButtons();
-    }
-
-    function filterPlayButtons() {
-        const playButtons = playButtonsContainer.querySelectorAll('.control-btn');
-        if (!activeZoneFilter) {
-            playButtons.forEach(btn => btn.style.display = 'block');
-            return;
-        }
-        const validPlays = new Set(Object.keys(PLAYBOOK.plays).filter(playName => {
-            const play = PLAYBOOK.plays[playName];
-            return Object.values(play).some(route => route.zoneTargets?.includes(activeZoneFilter));
-        }));
-        playButtons.forEach(btn => {
-            btn.style.display = validPlays.has(btn.dataset.value) ? 'block' : 'none';
-        });
-    }
-
-    // --- UTILITY FUNCTIONS ---
-    function createButtons(items, container, onClickCallback) {
-        items.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = 'control-btn';
-            btn.textContent = item;
-            btn.dataset.value = item;
-            btn.addEventListener('click', () => {
-                // For formations and plays, only one can be active.
-                if (container !== modifierButtonsContainer) {
-                    container.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                }
-                onClickCallback(item, btn);
-            });
-            container.appendChild(btn);
-        });
-    }
-
     // --- START THE APP ---
     initializeApp();
 });
+

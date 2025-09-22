@@ -1,132 +1,137 @@
 /* style.css */
 :root {
-    --bg-color: #f0f2f5;
-    --header-color: #ffffff;
-    --canvas-color: #ffffff;
-    --button-color: #007aff;
-    --button-text-color: #ffffff;
-    --text-color: #1c1c1e;
-    --border-color: #d1d1d6;
-    --active-button-color: #34c759;
-    --active-button-text-color: #ffffff;
+    --bg-primary: #1c1c1e;
+    --bg-secondary: #2c2c2e;
+    --bg-tertiary: #3a3a3c;
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+    --accent-blue: #0a84ff;
+    --accent-green: #30d158;
+    --accent-red: #ff453a;
+    --border-color: #444446;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+* {
+    box-sizing: border-box;
     margin: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    -webkit-tap-highlight-color: transparent; /* Disable tap highlight on iOS */
-    overflow: hidden; /* Prevent scrolling on the body */
+    padding: 0;
 }
 
-#app {
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: var(--font-family);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+}
+
+#app-container {
     display: flex;
-    flex-direction: column;
     height: 100vh;
 }
 
-header {
-    background-color: var(--header-color);
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border-color);
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    z-index: 10;
-}
-
-#current-play-display {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--button-color);
-    min-height: 25px;
-}
-
-main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.controls {
-    width: 320px;
-    padding: 15px;
+/* --- Control Panel --- */
+#control-panel {
+    width: 375px;
+    background-color: var(--bg-primary);
     border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.5rem;
     overflow-y: auto;
-    background-color: var(--header-color);
 }
 
-.control-group {
-    margin-bottom: 25px;
+.panel-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
 }
 
-.control-group h2 {
-    font-size: 1em;
+.playbook-manager {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.button {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s ease, background-color 0.2s;
+}
+.button:active { transform: scale(0.97); }
+
+.button-upload {
+    background-color: var(--accent-blue);
+    color: var(--text-primary);
+}
+.button-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.panel-section h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
     text-transform: uppercase;
-    color: #8a8a8e;
-    margin: 0 0 10px 0;
-    padding-bottom: 5px;
-    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 0.5px;
 }
 
 .button-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
+    gap: 0.75rem;
 }
 
-.control-btn {
-    padding: 15px 10px;
-    font-size: 1em;
+.selector-btn {
+    padding: 1.25rem 0.5rem;
+    font-size: 1rem;
     font-weight: 500;
-    border: 1px solid var(--button-color);
-    border-radius: 8px;
-    background-color: var(--header-color);
-    color: var(--button-color);
-    cursor: pointer;
-    transition: all 0.1s ease;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 2px solid var(--bg-secondary);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
 }
 
-.control-btn:active {
-    transform: scale(0.96);
+.selector-btn.active {
+    background-color: var(--accent-blue);
+    color: var(--text-primary);
+    border-color: var(--accent-blue);
+    font-weight: 600;
 }
 
-.control-btn.active {
-    background-color: var(--active-button-color);
-    color: var(--active-button-text-color);
-    border-color: var(--active-button-color);
+.play-list .selector-btn {
+    text-align: left;
+    padding: 1rem;
 }
 
-#play-canvas-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    background-color: #e5e5ea;
+.panel-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
-#play-canvas {
-    width: 100%;
-    height: 100%;
-    max-width: 800px;
-    background-color: var(--canvas-color);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Hand Signal Display */
 #signal-display {
     display: flex;
     gap: 10px;
     padding: 10px;
-    background-color: var(--bg-color);
+    background-color: var(--bg-secondary);
     border-radius: 8px;
-    min-height: 80px;
+    min-height: 90px;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    color: #8a8a8e;
+    color: var(--text-secondary);
 }
 
 #signal-display img {
@@ -138,22 +143,60 @@ main {
     border-radius: 4px;
 }
 
-/* Defensive Zone Styling */
-.zone {
-    fill: rgba(100, 100, 100, 0.0); /* Transparent fill */
-    stroke: rgba(100, 100, 100, 0.2);
-    stroke-width: 2;
-    stroke-dasharray: 5,5;
-    transition: fill 0.2s ease;
-    cursor: pointer;
+/* --- Main Content --- */
+#main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #000;
 }
 
-.zone:hover {
-    fill: rgba(0, 122, 255, 0.2);
+#play-display-header {
+    padding: 1.5rem;
+    text-align: center;
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.zone.active-filter {
-    fill: rgba(52, 199, 89, 0.3);
-    stroke: rgba(52, 199, 89, 0.8);
-    stroke-dasharray: none;
+#current-play-title {
+    font-size: 1.75rem;
+    font-weight: 600;
 }
+
+#play-canvas-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+#play-canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 900px;
+    background-color: #0d4a21; /* Field Green */
+    border-radius: 8px;
+}
+
+/* Player & Route Styles */
+.player-circle {
+    fill: var(--text-primary);
+    stroke: #000;
+    stroke-width: 2.5;
+}
+.player-label {
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+    fill: #000;
+}
+.route-path {
+    stroke-width: 4;
+    fill: none;
+    stroke-linecap: round;
+}
+.blocking-symbol {
+    fill: #000;
+}
+
