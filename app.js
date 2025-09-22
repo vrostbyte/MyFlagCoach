@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedRightConcept = (state.selectedRightConcept === conceptName) ? null : conceptName;
         }
         
-        // If a full field play was selected, deselect other concepts
         if (state.playbook.concepts.fullField[state.selectedLeftConcept]) {
             resetSelections(['selectedRightConcept', 'selectedModifier']);
         }
@@ -192,10 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const play = state.playbook.concepts.fullField[playName];
             if (play) {
                 state.currentAssignments = { ...play.assignments };
-                state.selectedLeftConcept = playName; // Use left concept as the flag for a full-field play
+                state.selectedLeftConcept = playName;
             }
         } else {
-             applyFormation(); // if deselecting, revert to base formation assignments
+             applyFormation();
         }
         renderUI();
     }
@@ -239,8 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentAssignments = {};
     }
 
-
-
     function applyFormation() {
         state.currentAssignments = {};
         if (!state.selectedBaseFormation || !state.selectedStrength) return;
@@ -263,38 +260,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.selectedRightConcept) applyConceptToSide(state.selectedRightConcept, 'right');
     }
 
+    // --- CORRECTED CONCEPT APPLICATION LOGIC ---
     function applyConceptToSide(conceptName, side) {
         const formationData = state.playbook.formations[state.selectedBaseFormation][state.selectedStrength];
         const sideInfo = formationData.sides[side];
         const countMap = { 1: 'oneMan', 2: 'twoMan', 3: 'threeMan' };
+        
         let concept;
+        const conceptType = countMap[sideInfo.count];
         
-        for (const type in countMap) {
-            const conceptTypeKey = countMap[type];
-            if(state.playbook.concepts[conceptTypeKey][conceptName]) {
-                concept = state.playbook.concepts[conceptTypeKey][conceptName];
-                break;
-            }
+        // Find concept in the correct group first (1, 2, or 3 man)
+        if (conceptType && state.playbook.concepts[conceptType][conceptName]) {
+            concept = state.playbook.concepts[conceptType][conceptName];
+        } 
+        // If it's a 2-man side, also check for 3-man concepts that use the center
+        else if (sideInfo.count === 2 && state.playbook.concepts.threeMan[conceptName]?.usesCenter) {
+            concept = state.playbook.concepts.threeMan[conceptName];
         }
-        
+
         if (!concept) return;
 
         if (concept.usesCenter && sideInfo.count === 2) {
-            state.currentAssignments[sideInfo.players.outer] = concept.assignments.outer;
-            state.currentAssignments[sideInfo.players.inner] = concept.assignments.middle;
-            state.currentAssignments['C'] = concept.assignments.inner;
+            state.currentAssignments[sideInfo.players.outer] = getRouteForSide(concept.assignments.outer, side);
+            state.currentAssignments[sideInfo.players.inner] = getRouteForSide(concept.assignments.middle, side);
+            state.currentAssignments['C'] = getRouteForSide(concept.assignments.inner, side);
         } else {
             for (const position in concept.assignments) {
                 const player = sideInfo.players[position];
                 if (player) {
-                    state.currentAssignments[player] = concept.assignments[position];
+                    const baseRouteName = concept.assignments[position];
+                    state.currentAssignments[player] = getRouteForSide(baseRouteName, side);
                 }
             }
         }
     }
 
+    function getRouteForSide(baseRouteName, side) {
+        const sideSuffix = side === 'left' ? '_L' : '_R';
+        const sideSpecificRoute = baseRouteName + sideSuffix;
+        if (state.playbook.routeLibrary[sideSpecificRoute]) {
+            return sideSpecificRoute;
+        }
+        return baseRouteName;
+    }
+
     function calculateFinalAssignments() {
-        const { playbook, selectedBaseFormation, selectedStrength, currentAssignments, selectedModifier } = state;
+        const { playbook, currentAssignments, selectedModifier } = state;
         let finalAssignments = { ...currentAssignments };
 
         if (selectedModifier && playbook.modifiers[selectedModifier]) {
@@ -310,25 +321,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const compressedPositions = JSON.parse(JSON.stringify(positions));
         const centerPos = compressedPositions['C'];
         if (!centerPos) return compressedPositions;
-
         const linePlayers = Object.keys(positions).filter(p => p !== 'Q' && p !== 'H' && positions[p].y < 400);
-        
         const leftSide = linePlayers.filter(p => positions[p].x < centerPos.x).sort((a, b) => positions[b].x - positions[a].x);
         const rightSide = linePlayers.filter(p => positions[p].x > centerPos.x).sort((a, b) => positions[a].x - positions[b].x);
-
-        leftSide.forEach((player, i) => {
-            compressedPositions[player].x = centerPos.x - (spacing * (i + 1));
-        });
-        rightSide.forEach((player, i) => {
-            compressedPositions[player].x = centerPos.x + (spacing * (i + 1));
-        });
-
+        leftSide.forEach((player, i) => { compressedPositions[player].x = centerPos.x - (spacing * (i + 1)); });
+        rightSide.forEach((player, i) => { compressedPositions[player].x = centerPos.x + (spacing * (i + 1)); });
         return compressedPositions;
     }
 
     // --- DRAWING ---
     function drawField() {
         playCanvas.innerHTML = '';
+        drawYardLines(); // NEW
         drawScrimmageLine();
         const { playbook, selectedBaseFormation, selectedStrength, selectedModifier } = state;
         if (!playbook || !selectedBaseFormation || !selectedStrength) return;
@@ -341,17 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (selectedModifier && playbook.modifiers[selectedModifier]) {
             const modifier = playbook.modifiers[selectedModifier];
-            
             if (modifier.player && modifier.position === 'mirrorH') {
                 const qPos = finalPositions['Q'];
                 const hPos = finalPositions['H'];
                 if (qPos && hPos) {
                     const dx = hPos.x - qPos.x;
-                    const dy = hPos.y - qPos.y;
-                    finalPositions[modifier.player] = { x: qPos.x - dx, y: qPos.y - dy };
+                    finalPositions[modifier.player] = { x: qPos.x - dx, y: hPos.y };
                 }
             }
-
             if (modifier.type === 'formationCompression') {
                 finalPositions = applyTightFormation(finalPositions, modifier.spacing);
             }
@@ -361,8 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (finalPositions[player]) {
                 const routeKey = finalAssignments[player];
                 const route = playbook.routeLibrary[routeKey];
-                const isRight = finalPositions[player].x > playCanvas.viewBox.baseVal.width / 2;
-                drawPlayer(player, finalPositions[player], route, isRight);
+                drawPlayer(player, finalPositions[player], route);
             }
         });
     }
@@ -373,24 +373,40 @@ document.addEventListener('DOMContentLoaded', () => {
         line.setAttribute('y1', '385');
         line.setAttribute('x2', '700');
         line.setAttribute('y2', '385');
-        line.setAttribute('stroke', 'rgba(255,255,255,0.7)');
-        line.setAttribute('stroke-width', '2');
-        line.setAttribute('stroke-dasharray', '5 5');
+        line.setAttribute('stroke', 'blue');
+        line.setAttribute('stroke-width', '3');
         playCanvas.appendChild(line);
     }
     
-    function drawPlayer(label, pos, route, isRightSide) {
+    // NEW: Function to draw yard lines
+    function drawYardLines() {
+        const scrimmageY = 385;
+        const yardageInterval = 60; // Represents 5 yards
+        for (let i = 1; i <= 4; i++) {
+            const y = scrimmageY - (yardageInterval * i);
+            const line = document.createElementNS(svgNamespace, 'line');
+            line.setAttribute('x1', '0');
+            line.setAttribute('y1', y);
+            line.setAttribute('x2', '700');
+            line.setAttribute('y2', y);
+            line.setAttribute('stroke', 'rgba(0, 0, 0, 0.1)');
+            line.setAttribute('stroke-width', '1.5');
+            line.setAttribute('stroke-dasharray', '8 8');
+            playCanvas.appendChild(line);
+        }
+    }
+    
+    function drawPlayer(label, pos, route) {
         const group = document.createElementNS(svgNamespace, 'g');
         group.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
 
         if (route && route.path) {
             const path = document.createElementNS(svgNamespace, 'path');
             path.setAttribute('d', route.path);
-            path.setAttribute('stroke', "yellow");
+            path.setAttribute('stroke', "black");
             path.setAttribute('stroke-width', '3');
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke-linecap', 'round');
-            // Arrowhead definition would go in SVG <defs> for better performance
             const defs = playCanvas.querySelector('defs') || document.createElementNS(svgNamespace, 'defs');
             if (!defs.querySelector('#arrow')) {
                 const marker = document.createElementNS(svgNamespace, 'marker');
@@ -403,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 marker.setAttribute('orient', 'auto-start-reverse');
                 const arrowPath = document.createElementNS(svgNamespace, 'path');
                 arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
-                arrowPath.setAttribute('fill', 'yellow');
+                arrowPath.setAttribute('fill', 'black');
                 marker.appendChild(arrowPath);
                 defs.appendChild(marker);
                 playCanvas.prepend(defs);
@@ -414,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const circle = document.createElementNS(svgNamespace, 'circle');
         circle.setAttribute('r', '18');
-        circle.setAttribute('fill', 'rgba(0, 0, 0, 0.5)');
+        circle.setAttribute('fill', 'rgba(0, 0, 0, 0.7)');
         circle.setAttribute('stroke', '#fff');
         circle.setAttribute('stroke-width', '2');
         group.appendChild(circle);
@@ -433,11 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateDisplay() {
         const { selectedBaseFormation, selectedStrength, selectedLeftConcept, selectedRightConcept, selectedModifier } = state;
-        
         let playCall = "";
         if (selectedModifier) playCall += `${selectedModifier} `;
         playCall += `${selectedBaseFormation || '...'} ${selectedStrength || ''}`;
-
         if (selectedLeftConcept && state.playbook.concepts.fullField[selectedLeftConcept]) {
             playCall = `${selectedModifier ? selectedModifier + ' ' : ''}${state.playbook.concepts.fullField[selectedLeftConcept].formation} ${selectedLeftConcept}`;
         } else {

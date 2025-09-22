@@ -3,15 +3,23 @@ const defaultPlaybook = {
     "go": { "name": "Go", "path": "M 0 0 V -220" },
     "post": { "name": "Post", "path": "M 0 0 V -60 L 80 -180" },
     "corner": { "name": "Corner", "path": "M 0 0 V -60 L -80 -180" },
-    // CORRECTED: New routes for a true crossing "Scissors" concept
-    "scissors_deep_in": { "name": "Scissors Deep In", "path": "M 0 0 v -120 L 80 -200" },
-    "scissors_shallow_in": { "name": "Scissors Shallow In", "path": "M 0 0 v -80 L 100 -160" },
+
+    // CORRECTED: Mirrored routes for a true crossing "Scissors" concept
+    "scissors_post_L": { "name": "Scissors Post", "path": "M 0 0 v -100 L 80 -180" },
+    "scissors_corner_L": { "name": "Scissors Corner", "path": "M 0 0 v -100 L -80 -180" },
+    "scissors_post_R": { "name": "Scissors Post", "path": "M 0 0 v -100 L -80 -180" },
+    "scissors_corner_R": { "name": "Scissors Corner", "path": "M 0 0 v -100 L 80 -180" },
+    
+    // CORRECTED: Mirrored routes for the "Dallas" concept
+    "dallas_slant_L": { "name": "Dallas Slant", "path": "M 0 0 v -36 L 80 -180" },
+    "dallas_slant_R": { "name": "Dallas Slant", "path": "M 0 0 v -36 L -80 -180" },
+    "now_seam": { "name": "Now Seam", "path": "M 0 0 V -180" },
+
     "out": { "name": "Out", "path": "M 0 0 V -100 H 100" },
     "in": { "name": "In/Dig", "path": "M 0 0 V -120 H -120" },
     "slant": { "name": "Slant", "path": "M 0 0 L -60 -60" },
     "hitch_6yd": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l -10 10" },
-    "dallas_slant": { "name": "Dallas Slant", "path": "M 0 0 v -36 L 80 -180" },
-    "now_go": { "name": "Now Go (15yd)", "path": "M 0 0 V -180" },
+
     "fresno_go": { "name": "Fresno Go", "path": "M 0 0 l 20 -36 v -180" },
     "fresno_sit": { "name": "Fresno Sit", "path": "M 0 0 l 60 -96 l -20 30" },
     "fresno_drag": { "name": "Fresno Drag", "path": "M 0 0 v -24 H 250" },
@@ -43,7 +51,11 @@ const defaultPlaybook = {
   },
   "concepts": {
       "oneMan": { "Go": { "assignments": { "outer": "go" } }, "Slant": { "assignments": { "outer": "slant" } }, "In": { "assignments": { "outer": "in" } }, "Houston": { "assignments": { "outer": "hitch_6yd" } } },
-      "twoMan": { "Houston": { "assignments": { "outer": "hitch_6yd", "inner": "hitch_6yd" } }, "Dallas": { "assignments": { "outer": "dallas_slant", "inner": "now_go" } }, "Scissors": { "assignments": { "outer": "scissors_deep_in", "inner": "scissors_shallow_in" } } },
+      "twoMan": { 
+          "Houston": { "assignments": { "outer": "hitch_6yd", "inner": "hitch_6yd" } }, 
+          "Dallas": { "assignments": { "outer": "dallas_slant", "inner": "now_seam" } }, 
+          "Scissors": { "assignments": { "outer": "scissors_post", "inner": "scissors_corner" } } 
+      },
       "threeMan": { "Houston": { "assignments": { "outer": "hitch_6yd", "middle": "hitch_6yd", "inner": "hitch_6yd" } }, "Fresno": { "usesCenter": true, "assignments": { "outer": "fresno_go", "middle": "fresno_sit", "inner": "fresno_drag" } }, "Spacing": { "assignments": { "outer": "hitch_6yd", "middle": "flat", "inner": "slant" } } },
       "fullField": {
           "Yale": { "name": "Yale Screen", "formation": "Empty Lt", "assignments": { "X": "screen_rcv", "F": "screen_block", "Y": "screen_block", "Z": "go", "H": "slant", "C": "block", "Q": "block" } },

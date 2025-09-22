@@ -2,8 +2,8 @@
 :root {
     --bg-color: #f0f2f5;
     --panel-bg-color: #ffffff;
-    --field-bg-color: #4CAF50;
-    --line-color: rgba(255, 255, 255, 0.6);
+    --field-bg-color: #ffffff; /* UPDATED: Cleaner white background */
+    --line-color: rgba(0, 0, 0, 0.15); /* UPDATED: Darker lines for contrast */
     --text-color: #1c1c1e;
     --text-color-light: #6a6a6e;
     --border-color: #d1d1d6;
@@ -65,6 +65,7 @@ body {
     flex: 1;
     min-height: 400px;
     background-color: var(--field-bg-color);
+    border: 1px solid var(--border-color); /* ADDED: Border for definition */
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     display: flex;
@@ -99,12 +100,12 @@ body {
 }
 
 #file-controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
 }
 
 .file-btn {
-    flex: 1;
     padding: 12px;
     font-size: 0.9em;
     font-weight: 500;
@@ -177,7 +178,7 @@ body {
     padding: 10px 0;
 }
 
-/* --- NEW: Assignments Table Styles --- */
+/* --- Assignments Table Styles --- */
 #assignments-container {
     background-color: var(--panel-bg-color);
     border: 1px solid var(--border-color);
@@ -220,3 +221,4 @@ body {
     text-align: center;
     color: var(--primary-color);
 }
+
