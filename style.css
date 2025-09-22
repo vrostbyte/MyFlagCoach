@@ -1,0 +1,159 @@
+/* style.css */
+:root {
+    --bg-color: #f0f2f5;
+    --header-color: #ffffff;
+    --canvas-color: #ffffff;
+    --button-color: #007aff;
+    --button-text-color: #ffffff;
+    --text-color: #1c1c1e;
+    --border-color: #d1d1d6;
+    --active-button-color: #34c759;
+    --active-button-text-color: #ffffff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    -webkit-tap-highlight-color: transparent; /* Disable tap highlight on iOS */
+    overflow: hidden; /* Prevent scrolling on the body */
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background-color: var(--header-color);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+#current-play-display {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--button-color);
+    min-height: 25px;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.controls {
+    width: 320px;
+    padding: 15px;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    background-color: var(--header-color);
+}
+
+.control-group {
+    margin-bottom: 25px;
+}
+
+.control-group h2 {
+    font-size: 1em;
+    text-transform: uppercase;
+    color: #8a8a8e;
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.control-btn {
+    padding: 15px 10px;
+    font-size: 1em;
+    font-weight: 500;
+    border: 1px solid var(--button-color);
+    border-radius: 8px;
+    background-color: var(--header-color);
+    color: var(--button-color);
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.control-btn:active {
+    transform: scale(0.96);
+}
+
+.control-btn.active {
+    background-color: var(--active-button-color);
+    color: var(--active-button-text-color);
+    border-color: var(--active-button-color);
+}
+
+#play-canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #e5e5ea;
+}
+
+#play-canvas {
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    background-color: var(--canvas-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Hand Signal Display */
+#signal-display {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    min-height: 80px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: #8a8a8e;
+}
+
+#signal-display img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* Defensive Zone Styling */
+.zone {
+    fill: rgba(100, 100, 100, 0.0); /* Transparent fill */
+    stroke: rgba(100, 100, 100, 0.2);
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    transition: fill 0.2s ease;
+    cursor: pointer;
+}
+
+.zone:hover {
+    fill: rgba(0, 122, 255, 0.2);
+}
+
+.zone.active-filter {
+    fill: rgba(52, 199, 89, 0.3);
+    stroke: rgba(52, 199, 89, 0.8);
+    stroke-dasharray: none;
+}
