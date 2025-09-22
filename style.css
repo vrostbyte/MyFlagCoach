@@ -1,77 +1,136 @@
-/* style.css */
+/* --- Base Styles & Variables --- */
 :root {
-    --bg-color: #1c1c1e; /* Dark mode background */
-    --surface-color: #2c2c2e; /* Slightly lighter surface */
-    --primary-color: #0a84ff; /* Apple's vibrant blue */
-    --active-color: #30d158; /* Apple's green */
-    --text-color: #ffffff;
-    --text-secondary-color: #8e8e93;
-    --border-color: #3a3a3c;
+    --bg-color: #f0f2f5;
+    --panel-bg-color: #ffffff;
+    --field-bg-color: #4CAF50;
+    --line-color: rgba(255, 255, 255, 0.6);
+    --text-color: #1c1c1e;
+    --text-color-light: #6a6a6e;
+    --border-color: #d1d1d6;
+    --primary-color: #007aff;
+    --active-color: #34c759;
+    --file-btn-color: #6c757d;
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
+body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
-    -webkit-tap-highlight-color: transparent; /* Disable tap highlight on iOS */
-}
-
-#app {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-}
-
-/* --- Control Panel --- */
-.control-panel {
-    width: 350px;
-    background-color: var(--surface-color);
-    border-right: 1px solid var(--border-color);
+    -webkit-tap-highlight-color: transparent;
     display: flex;
     flex-direction: column;
-    padding: 1.5rem;
-    overflow-y: auto;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.control-panel header {
+/* --- Main Layout --- */
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.main-header {
+    background-color: var(--panel-bg-color);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border-color);
     text-align: center;
-    margin-bottom: 2rem;
-}
-
-.control-panel h1 {
-    margin: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 #current-play-display {
-    min-height: 40px;
-    color: var(--primary-color);
+    font-size: 1.2em;
     font-weight: 600;
-    margin-top: 0.5rem;
-    font-size: 1.1rem;
+    color: var(--primary-color);
+    min-height: 25px;
 }
 
-.control-group {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.field-and-table-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.field-container {
+    flex: 1;
+    min-height: 400px;
+    background-color: var(--field-bg-color);
     border-radius: 12px;
-    background-color: var(--bg-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.control-group h2 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    color: var(--text-secondary-color);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+#play-canvas {
+    width: 100%;
+    height: 100%;
 }
 
-.control-group.disabled {
-    opacity: 0.4;
-    pointer-events: none;
+.controls-container {
+    width: 400px;
+    background-color: var(--panel-bg-color);
+    border-left: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+.control-panel {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- Control Groups & Buttons --- */
+.control-group {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+#file-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.file-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 0.9em;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--file-btn-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.file-btn:hover {
+    background-color: #5a6268;
+}
+
+.play-call-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.step-title {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-color-light);
 }
 
 .button-grid {
@@ -80,67 +139,84 @@ html, body {
     gap: 10px;
 }
 
+.button-grid.vertical {
+    grid-template-columns: 1fr;
+}
+
 .control-btn {
-    padding: 16px 10px;
-    font-size: 1rem;
-    font-weight: 500;
-    border: none;
+    padding: 15px 10px;
+    font-size: 1em;
+    border: 2px solid var(--primary-color);
     border-radius: 8px;
-    background-color: #3a3a3c;
-    color: var(--text-color);
+    background-color: white;
+    color: var(--primary-color);
     cursor: pointer;
-    transition: transform 0.1s ease, background-color 0.2s ease;
+    font-weight: 500;
+    transition: all 0.15s ease;
 }
 
 .control-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
 }
 
 .control-btn.active {
     background-color: var(--primary-color);
-    font-weight: 700;
-}
-
-.control-btn.modifier.active {
-    background-color: var(--active-color);
-}
-
-.placeholder {
-    color: var(--text-secondary-color);
-    text-align: center;
-    grid-column: 1 / -1; /* Span both columns */
-}
-
-footer {
-    margin-top: auto;
-    padding-top: 1rem;
-}
-
-#reset-button {
-    width: 100%;
-    padding: 16px;
-    font-size: 1.1rem;
-    font-weight: bold;
     color: white;
-    background-color: #ff3b30; /* Apple's red */
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
 }
 
-/* --- Canvas Area --- */
-.canvas-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
+.concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
-#play-canvas {
-    width: 100%;
-    height: 100%;
-    background-color: #004d1a; /* Dark green field color */
+.placeholder-text {
+    text-align: center;
+    color: var(--text-color-light);
+    font-style: italic;
+    padding: 10px 0;
+}
+
+/* --- NEW: Assignments Table Styles --- */
+#assignments-container {
+    background-color: var(--panel-bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.assignments-title {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--text-color-light);
+}
+
+#assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#assignments-table th,
+#assignments-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#assignments-table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+#assignments-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#assignments-table td:first-child {
+    font-weight: 700;
+    width: 30%;
+    text-align: center;
+    color: var(--primary-color);
 }

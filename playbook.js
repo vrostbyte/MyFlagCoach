@@ -49,4 +49,3 @@ const defaultPlaybook = {
   },
   "modifiers": { "Max": { "H": "block" }, "Houston Z": { "Z": "go" }, "Houston X": { "X": "go" } }
 };
-

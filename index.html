@@ -1,69 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flag Football Playmaker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 </head>
-
 <body>
     <div id="app">
-        <aside class="control-panel">
-            <header>
-                <h1>Play Constructor</h1>
-                <p id="current-play-display">Build your play...</p>
-            </header>
+        <header class="main-header">
+            <h1>Play Constructor</h1>
+            <div id="current-play-display">Build Your Play</div>
+        </header>
 
-            <div class="control-group" id="step1">
-                <h2>1. Formation</h2>
-                <div id="formation-buttons" class="button-grid">
-                    <!-- Base Formation buttons will be generated here -->
+        <main class="main-content">
+            <div class="field-and-table-container">
+                <div class="field-container">
+                    <svg id="play-canvas" viewBox="0 0 700 550"></svg>
+                </div>
+                
+                <!-- NEW: Assignments Table -->
+                <div id="assignments-container">
+                    <h3 class="assignments-title">Player Responsibilities</h3>
+                    <table id="assignments-table">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Assignment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JS Populated -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="control-group disabled" id="step2">
-                <h2>2. Strength (Side)</h2>
-                <div id="strength-buttons" class="button-grid">
-                     <p class="placeholder">Select a Formation</p>
+            <div class="controls-container">
+                <div class="control-panel">
+                    <div class="control-group" id="file-controls">
+                        <button id="upload-button" class="file-btn">Upload Playbook</button>
+                        <input type="file" id="playbook-file" accept=".json" hidden>
+                        <button id="reset-button" class="file-btn">Reset Play</button>
+                    </div>
+
+                    <div class="play-call-flow">
+                        <!-- Step 1: Formations -->
+                        <div class="flow-step">
+                            <h3 class="step-title">1. Formation</h3>
+                            <div id="formation-buttons" class="button-grid">
+                                <!-- JS Populated -->
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Strength (Side) -->
+                        <div class="flow-step">
+                            <h3 class="step-title">2. Strength</h3>
+                            <div id="strength-buttons" class="button-grid">
+                                <!-- JS Populated -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Full Field Plays Section -->
+                    <div class="control-group" id="full-field-container">
+                        <h3 class="step-title">Full Field Plays</h3>
+                        <div id="full-field-buttons" class="button-grid">
+                            <!-- JS Populated -->
+                        </div>
+                    </div>
+
+                    <!-- Step 3 & 4: Concepts -->
+                    <div class="concept-grid">
+                        <div class="concept-column">
+                            <h3 class="step-title">3. Left Concept</h3>
+                            <div id="left-concept-buttons" class="button-grid vertical">
+                                <!-- JS Populated -->
+                            </div>
+                        </div>
+                        <div class="concept-column">
+                            <h3 class="step-title">4. Right Concept</h3>
+                            <div id="right-concept-buttons" class="button-grid vertical">
+                                <!-- JS Populated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Modifiers -->
+                    <div class="control-group" id="modifier-container">
+                        <h3 class="step-title">5. Modifiers</h3>
+                        <div id="modifier-buttons" class="button-grid">
+                            <!-- JS Populated -->
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="control-group disabled" id="step3">
-                <h2>3. Left Side Concept</h2>
-                <div id="left-concept-buttons" class="button-grid">
-                    <p class="placeholder">Select Strength</p>
-                </div>
-            </div>
-            
-            <div class="control-group disabled" id="step4">
-                <h2>4. Right Side Concept</h2>
-                <div id="right-concept-buttons" class="button-grid">
-                    <p class="placeholder">Select Strength</p>
-                </div>
-            </div>
-
-            <div class="control-group disabled" id="step5">
-                <h2>5. Modifiers</h2>
-                <div id="modifier-buttons" class="button-grid">
-                     <p class="placeholder">Select Strength</p>
-                </div>
-            </div>
-
-            <footer>
-                <button id="reset-button">Reset Play</button>
-            </footer>
-        </aside>
-
-        <main class="canvas-container">
-            <svg id="play-canvas" viewBox="0 0 700 600"></svg>
         </main>
     </div>
 
-    <!-- This should point to your local, editable playbook file -->
-    <script src="playbook.js"></script> 
+    <script src="playbook.js"></script> <!-- Default playbook data -->
     <script src="app.js"></script>
 </body>
-
 </html>
