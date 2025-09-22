@@ -107,15 +107,28 @@ document.addEventListener('DOMContentLoaded', () => {
         createButtons(modifiers, modifierContainer, handleModifierSelect, state.selectedModifier);
     }
     
+    // UPDATED: Smarter logic to filter concepts
     function populateConceptContainer(sideInfo, container, handler, activeItem) {
         const countMap = { 1: 'oneMan', 2: 'twoMan', 3: 'threeMan' };
         let availableConcepts = [];
         const conceptType = countMap[sideInfo.count];
-        if (conceptType) availableConcepts.push(...Object.keys(state.playbook.concepts[conceptType] || {}));
+        
+        if (conceptType) {
+            const concepts = state.playbook.concepts[conceptType] || {};
+            availableConcepts.push(...Object.keys(concepts).filter(name => {
+                const concept = concepts[name];
+                return !concept.formation || concept.formation === state.selectedBaseFormation;
+            }));
+        }
         
         if (sideInfo.count === 2) {
-            Object.entries(state.playbook.concepts.threeMan || {}).forEach(([name, concept]) => {
-                if (concept.usesCenter) availableConcepts.push(name);
+            const threeManConcepts = state.playbook.concepts.threeMan || {};
+            Object.entries(threeManConcepts).forEach(([name, concept]) => {
+                if (concept.usesCenter) {
+                     if (!concept.formation || concept.formation === state.selectedBaseFormation) {
+                        availableConcepts.push(name);
+                    }
+                }
             });
         }
         createButtons(availableConcepts, container, handler, activeItem);
@@ -269,11 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let concept;
         const conceptType = countMap[sideInfo.count];
         
-        // Find concept in the correct group first (1, 2, or 3 man)
         if (conceptType && state.playbook.concepts[conceptType][conceptName]) {
             concept = state.playbook.concepts[conceptType][conceptName];
         } 
-        // If it's a 2-man side, also check for 3-man concepts that use the center
         else if (sideInfo.count === 2 && state.playbook.concepts.threeMan[conceptName]?.usesCenter) {
             concept = state.playbook.concepts.threeMan[conceptName];
         }
@@ -332,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DRAWING ---
     function drawField() {
         playCanvas.innerHTML = '';
-        drawYardLines(); // NEW
+        drawYardLines();
         drawScrimmageLine();
         const { playbook, selectedBaseFormation, selectedStrength, selectedModifier } = state;
         if (!playbook || !selectedBaseFormation || !selectedStrength) return;
@@ -378,10 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playCanvas.appendChild(line);
     }
     
-    // NEW: Function to draw yard lines
     function drawYardLines() {
         const scrimmageY = 385;
-        const yardageInterval = 60; // Represents 5 yards
+        const yardageInterval = 60;
         for (let i = 1; i <= 4; i++) {
             const y = scrimmageY - (yardageInterval * i);
             const line = document.createElementNS(svgNamespace, 'line');
