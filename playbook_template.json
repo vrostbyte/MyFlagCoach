@@ -16,41 +16,32 @@
     "swingL": { "name": "Swing Left", "path": "M 0 0 C -50 30, -150 30, -200 10" }
   },
   "formations": {
-    "Trips Lt": { 
+    "Trips": {
+      "Lt": { 
         "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "Y": { "x": 260, "y": 380 }, "C": { "x": 450, "y": 390 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 450, "y": 480 }, "H": { "x": 520, "y": 480 } },
-        "sides": {
-            "left": { "count": 3, "players": { "outer": "X", "middle": "F", "inner": "Y" } },
-            "right": { "count": 1, "players": { "outer": "Z" } }
-        }
+        "sides": { "left": { "count": 3, "players": { "outer": "X", "middle": "F", "inner": "Y" } }, "right": { "count": 1, "players": { "outer": "Z" } } }
+      },
+      "Rt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 420, "y": 380 }, "F": { "x": 500, "y": 380 }, "Z": { "x": 580, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } },
+        "sides": { "left": { "count": 1, "players": { "outer": "X" } }, "right": { "count": 3, "players": { "outer": "Z", "middle": "F", "inner": "Y" } } }
+      }
     },
-    "Divide Lt": {
+    "Divide": {
+      "Lt": {
         "positions": { "X": { "x": 100, "y": 380 }, "Y": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "F": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 420, "y": 480 } },
-        "sides": {
-            "left": { "count": 2, "players": { "outer": "X", "inner": "Y" } },
-            "right": { "count": 2, "players": { "outer": "Z", "inner": "F" } }
-        }
+        "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "Y" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "F" } } }
+      },
+       "Rt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } },
+        "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "F" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "Y" } } }
+      }
     }
   },
   "concepts": {
-      "twoMan": {
-          "Houston": { "assignments": { "outer": "go", "inner": "hitch" } },
-          "Dallas": { "assignments": { "outer": "comeback", "inner": "in" } },
-          "Scissors": { "assignments": { "outer": "post", "inner": "corner" } }
-      },
-      "threeMan": {
-          "Fresno": { "assignments": { "outer": "comeback", "middle": "out", "inner": "flat" } },
-          "Spacing": { "assignments": { "outer": "hitch", "middle": "flat", "inner": "slant" } }
-      },
-      "oneMan": {
-          "Go": { "assignments": { "outer": "go" } },
-          "Slant": { "assignments": { "outer": "slant" } },
-          "In": { "assignments": { "outer": "in" } }
-      }
+      "oneMan": { "Go": { "assignments": { "outer": "go" } }, "Slant": { "assignments": { "outer": "slant" } }, "In": { "assignments": { "outer": "in" } } },
+      "twoMan": { "Houston": { "assignments": { "outer": "go", "inner": "hitch" } }, "Dallas": { "assignments": { "outer": "comeback", "inner": "in" } }, "Scissors": { "assignments": { "outer": "post", "inner": "corner" } } },
+      "threeMan": { "Fresno": { "assignments": { "outer": "comeback", "middle": "out", "inner": "flat" } }, "Spacing": { "assignments": { "outer": "hitch", "middle": "flat", "inner": "slant" } } }
   },
-  "modifiers": {
-    "Max": { "H": "block" },
-    "Houston Z": { "Z": "go" },
-    "Houston X": { "X": "go" }
-  }
+  "modifiers": { "Max": { "H": "block" }, "Houston Z": { "Z": "go" }, "Houston X": { "X": "go" } }
 }
 

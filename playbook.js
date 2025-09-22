@@ -1,115 +1,52 @@
-// playbook.js
-
-/*
-  VERSION 2.0 PLAYBOOK STRUCTURE
-  This file now defines a "defaultPlaybook". The app will load this on first run,
-  but it can be replaced by a user-uploaded JSON file.
-
-  NEW CONCEPTS:
-  - routeLibrary: A master list of all possible routes. This avoids repetition
-    and is the key to building custom plays later.
-  - plays: Now just contain metadata and 'assignments' which map a player (e.g., 'X')
-    to a key from the routeLibrary (e.g., 'go').
-  - defenses: A list of defensive formations for the UI.
-*/
+// This file acts as a bridge to your main playbook data.
+// For the web app to work, it expects a global variable named `defaultPlaybook`.
+// You can copy the entire content of your `playbook_template.json` file
+// and paste it here, assigning it to the `defaultPlaybook` constant.
 
 const defaultPlaybook = {
-  // Master library of all routes. Plays will reference these keys.
-  routeLibrary: {
-    'go': { name: 'Go', path: 'M 0 0 V -220' },
-    'post': { name: 'Post', path: 'M 0 0 L 80 -160' },
-    'corner': { name: 'Corner', path: 'M 0 0 L -80 -160' },
-    'out': { name: 'Out', path: 'M 0 0 V -80 H 100' },
-    'in': { name: 'In', path: 'M 0 0 V -80 H -100' },
-    'slant': { name: 'Slant', path: 'M 0 0 L -60 -60' },
-    'flat': { name: 'Flat', path: 'M 0 0 C 20 -5, 40 -5, 60 0 H 100' },
-    'shallow': { name: 'Shallow Cross', path: 'M 0 0 C 100 -20, 250 -20, 400 0' },
-    'deepCross': { name: 'Deep Cross', path: 'M 0 0 C 150 -150, 300 -180, 400 -180' },
-    'comeback': { name: 'Comeback', path: 'M 0 0 V -120 L -20 -100' },
-    'block': { name: 'Block', path: '' }, // Empty path for blocking assignment
-    'swingR': { name: 'Swing Right', path: 'M 0 0 C 50 30, 150 30, 200 10' },
-    'swingL': { name: 'Swing Left', path: 'M 0 0 C -50 30, -150 30, -200 10' },
-    'screen': { name: 'Screen', path: 'M 0 0 L 20 20' }
+  "routeLibrary": {
+    "go": { "name": "Go/Houston", "path": "M 0 0 V -220" },
+    "post": { "name": "Post", "path": "M 0 0 V -40 L 80 -160" },
+    "corner": { "name": "Corner", "path": "M 0 0 V -40 L -80 -160" },
+    "out": { "name": "Out", "path": "M 0 0 V -80 H 100" },
+    "in": { "name": "In/Dig", "path": "M 0 0 V -80 H -100" },
+    "slant": { "name": "Slant", "path": "M 0 0 L -60 -60" },
+    "hitch": { "name": "Hitch", "path": "M 0 0 V -40" },
+    "flat": { "name": "Flat", "path": "M 0 0 C 20 -5, 40 -5, 60 0 H 100" },
+    "shallow": { "name": "Shallow Cross", "path": "M 0 0 C 100 -20, 250 -20, 400 0" },
+    "deepCross": { "name": "Deep Cross", "path": "M 0 0 C 150 -150, 300 -180, 400 -180" },
+    "comeback": { "name": "Comeback", "path": "M 0 0 V -120 L -20 -100" },
+    "block": { "name": "Block", "path": "" },
+    "swingR": { "name": "Swing Right", "path": "M 0 0 C 50 30, 150 30, 200 10" },
+    "swingL": { "name": "Swing Left", "path": "M 0 0 C -50 30, -150 30, -200 10" }
   },
-
-  // List of all formations with player coordinates.
-  formations: {
-    "Trips Lt": {
-      X: { x: 100, y: 380 }, F: { x: 180, y: 380 }, Y: { x: 260, y: 380 },
-      C: { x: 450, y: 390 }, Z: { x: 600, y: 380 }, H: { x: 400, y: 450 }, Q: { x: 400, y: 500 },
-    },
-    "Divide Rt": {
-      X: { x: 100, y: 380 }, F: { x: 180, y: 380 }, C: { x: 350, y: 390 },
-      Y: { x: 520, y: 380 }, Z: { x: 600, y: 380 }, H: { x: 350, y: 450 }, Q: { x: 350, y: 500 },
-    },
-    "Bunch Rt": {
-      X: { x: 100, y: 380 }, C: { x: 350, y: 390 }, Y: { x: 550, y: 380 },
-      F: { x: 580, y: 400 }, Z: { x: 610, y: 380 }, H: { x: 350, y: 450 }, Q: { x: 350, y: 500 },
-    },
-    "Empty Lt": {
-      X: { x: 50, y: 380 }, F: { x: 130, y: 380 }, Y: { x: 210, y: 380 },
-      C: { x: 350, y: 390 }, H: { x: 490, y: 380 }, Z: { x: 570, y: 380 }, Q: { x: 350, y: 500 },
-    }
-    // TODO: Add Trips Rt, Divide Lt, Bunch Lt, Empty Rt
-  },
-
-  // List of all plays with metadata and route assignments.
-  plays: {
-    "Flood": {
-      name: "Flood",
-      description: "Overloads one side of the field with routes at different depths.",
-      strongAgainst: ["Cover 3", "Zone"],
-      assignments: {
-        X: 'go', Y: 'flat', F: 'out', Z: 'post', H: 'swingL', C: 'block', Q: 'block'
+  "formations": {
+    "Trips": {
+      "Lt": { 
+        "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "Y": { "x": 260, "y": 380 }, "C": { "x": 450, "y": 390 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 450, "y": 480 }, "H": { "x": 520, "y": 480 } },
+        "sides": { "left": { "count": 3, "players": { "outer": "X", "middle": "F", "inner": "Y" } }, "right": { "count": 1, "players": { "outer": "Z" } } }
       },
-      routeColors: { X: '#ff453a', Z: '#ff453a' } // Example of custom coloring
-    },
-    "Shallows": {
-      name: "Shallow Cross",
-      description: "Two receivers cross at shallow depth, creating a natural pick.",
-      strongAgainst: ["Man", "Cover 1"],
-      assignments: {
-        X: 'post', Y: 'shallow', F: 'in', Z: 'go', H: 'swingR', C: 'block', Q: 'block'
+      "Rt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 420, "y": 380 }, "F": { "x": 500, "y": 380 }, "Z": { "x": 580, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } },
+        "sides": { "left": { "count": 1, "players": { "outer": "X" } }, "right": { "count": 3, "players": { "outer": "Z", "middle": "F", "inner": "Y" } } }
       }
     },
-    "Crossers": {
-        name: "Crossers",
-        description: "Multiple receivers run deep crossing routes.",
-        strongAgainst: ["Zone", "Cover 3"],
-        assignments: {
-            X: 'deepCross', Y: 'post', F: 'in', Z: 'go', H: 'flat', C: 'block', Q: 'block'
-        }
-    },
-    "Screens": {
-        name: "Jailbreak Screen",
-        description: "Quick throw to a receiver with blockers in front.",
-        strongAgainst: ["Blitz", "Man"],
-        assignments: {
-            X: 'block', Y: 'screen', F: 'block', Z: 'go', H: 'go', C: 'block', Q: 'block'
-        }
+    "Divide": {
+      "Lt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "Y": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "F": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 420, "y": 480 } },
+        "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "Y" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "F" } } }
+      },
+       "Rt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } },
+        "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "F" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "Y" } } }
+      }
     }
   },
-
-  // Available defensive formations for the recommendation engine.
-  defenses: [
-    "Cover 1", "Cover 2", "Cover 3", "Man", "Zone", "Blitz"
-  ],
-
-  // Modifiers can override a player's assignment
-  modifiers: {
-    "Max": { F: 'block' } // "Max" modifier makes F a blocker
+  "concepts": {
+      "oneMan": { "Go": { "assignments": { "outer": "go" } }, "Slant": { "assignments": { "outer": "slant" } }, "In": { "assignments": { "outer": "in" } } },
+      "twoMan": { "Houston": { "assignments": { "outer": "go", "inner": "hitch" } }, "Dallas": { "assignments": { "outer": "comeback", "inner": "in" } }, "Scissors": { "assignments": { "outer": "post", "inner": "corner" } } },
+      "threeMan": { "Fresno": { "assignments": { "outer": "comeback", "middle": "out", "inner": "flat" } }, "Spacing": { "assignments": { "outer": "hitch", "middle": "flat", "inner": "slant" } } }
   },
-  
-  // Hand signals can be linked to formations or plays
-  handSignals: {
-    formations: {
-        "Trips": "signals/trips_signal.png",
-        "Divide": "signals/divide_signal.png",
-    },
-    plays: {
-        "Flood": "signals/flood_signal.png",
-        "Shallows": "signals/shallows_signal.png",
-    }
-  }
+  "modifiers": { "Max": { "H": "block" }, "Houston Z": { "Z": "go" }, "Houston X": { "X": "go" } }
 };
 

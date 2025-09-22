@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flag Football Playmaker</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="apple-touch-icon" href="signals/icon.png"> <!-- Optional: for home screen icon -->
 </head>
 
 <body>
@@ -20,28 +19,35 @@
             <div class="control-group" id="step1">
                 <h2>1. Formation</h2>
                 <div id="formation-buttons" class="button-grid">
-                    <!-- Formation buttons will be generated here -->
+                    <!-- Base Formation buttons will be generated here -->
                 </div>
             </div>
 
-            <div class="control-group" id="step2">
-                <h2>2. Left Side Concept</h2>
+            <div class="control-group disabled" id="step2">
+                <h2>2. Strength (Side)</h2>
+                <div id="strength-buttons" class="button-grid">
+                     <p class="placeholder">Select a Formation</p>
+                </div>
+            </div>
+
+            <div class="control-group disabled" id="step3">
+                <h2>3. Left Side Concept</h2>
                 <div id="left-concept-buttons" class="button-grid">
-                    <p class="placeholder">Select a Formation</p>
+                    <p class="placeholder">Select Strength</p>
                 </div>
             </div>
             
-            <div class="control-group" id="step3">
-                <h2>3. Right Side Concept</h2>
+            <div class="control-group disabled" id="step4">
+                <h2>4. Right Side Concept</h2>
                 <div id="right-concept-buttons" class="button-grid">
-                    <p class="placeholder">Select a Formation</p>
+                    <p class="placeholder">Select Strength</p>
                 </div>
             </div>
 
-            <div class="control-group" id="step4">
-                <h2>4. Modifiers</h2>
+            <div class="control-group disabled" id="step5">
+                <h2>5. Modifiers</h2>
                 <div id="modifier-buttons" class="button-grid">
-                     <p class="placeholder">Select a Formation</p>
+                     <p class="placeholder">Select Strength</p>
                 </div>
             </div>
 
@@ -55,10 +61,9 @@
         </main>
     </div>
 
-    <!-- Import our JavaScript files -->
-    <script src="playbook.js"></script> <!-- This will be your editable playbook file -->
+    <!-- This should point to your local, editable playbook file -->
+    <script src="playbook.js"></script> 
     <script src="app.js"></script>
 </body>
 
 </html>
-
