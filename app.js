@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playbookFileInput = document.getElementById('playbook-file');
     const uploadButton = document.getElementById('upload-button');
     const resetButton = document.getElementById('reset-button');
+    const loadDefaultButton = document.getElementById('load-default-button');
     const svgNamespace = "http://www.w3.org/2000/svg";
 
     // --- INITIALIZATION ---
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadButton.addEventListener('click', () => playbookFileInput.click());
         playbookFileInput.addEventListener('change', handleFileUpload);
         resetButton.addEventListener('click', resetPlay);
+        loadDefaultButton.addEventListener('click', handleLoadDefault);
     }
     
     // --- UI RENDERING ---
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFullFieldButtons();
         renderModifierButtons();
         drawField();
-        renderAssignmentsTable(); // NEW Call
+        renderAssignmentsTable();
         updateDisplay();
     }
 
@@ -70,45 +72,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderConceptButtons() {
-        // ... (same as before)
+        if (!state.selectedBaseFormation || !state.selectedStrength) {
+            leftConceptContainer.innerHTML = '<p class="placeholder-text">Select Formation & Strength</p>';
+            rightConceptContainer.innerHTML = '<p class="placeholder-text">Select Formation & Strength</p>';
+            return;
+        }
+        const formationData = state.playbook.formations[state.selectedBaseFormation][state.selectedStrength];
+        populateConceptContainer(formationData.sides.left, leftConceptContainer, handleLeftConceptSelect, state.selectedLeftConcept);
+        populateConceptContainer(formationData.sides.right, rightConceptContainer, handleRightConceptSelect, state.selectedRightConcept);
     }
 
     function renderFullFieldButtons() {
-        // ... (same as before)
+        fullFieldContainer.innerHTML = '';
+        document.getElementById('full-field-container').style.display = 'none';
+
+        if (!state.selectedBaseFormation || !state.selectedStrength) return;
+
+        const fullFormationName = `${state.selectedBaseFormation} ${state.selectedStrength}`;
+        const plays = state.playbook.concepts.fullField || {};
+        const availablePlays = Object.keys(plays).filter(key => plays[key].formation === fullFormationName);
+
+        if (availablePlays.length > 0) {
+            document.getElementById('full-field-container').style.display = 'block';
+            createButtons(availablePlays, fullFieldContainer, handleFullFieldSelect, state.selectedLeftConcept);
+        }
     }
 
     function renderModifierButtons() {
-        // ... (same as before)
+        if (!state.selectedBaseFormation || !state.selectedStrength) {
+             modifierContainer.innerHTML = '<p class="placeholder-text">Select Formation & Strength</p>';
+            return;
+        }
+        const modifiers = Object.keys(state.playbook.modifiers || {});
+        createButtons(modifiers, modifierContainer, handleModifierSelect, state.selectedModifier);
     }
     
     function populateConceptContainer(sideInfo, container, handler, activeItem) {
-        // ... (same as before)
+        const countMap = { 1: 'oneMan', 2: 'twoMan', 3: 'threeMan' };
+        let availableConcepts = [];
+        const conceptType = countMap[sideInfo.count];
+        if (conceptType) availableConcepts.push(...Object.keys(state.playbook.concepts[conceptType] || {}));
+        
+        if (sideInfo.count === 2) {
+            Object.entries(state.playbook.concepts.threeMan || {}).forEach(([name, concept]) => {
+                if (concept.usesCenter) availableConcepts.push(name);
+            });
+        }
+        createButtons(availableConcepts, container, handler, activeItem);
     }
 
     function createButtons(items, container, onClick, activeItem) {
-        // ... (same as before)
+        container.innerHTML = '';
+        if (items.length === 0) {
+            container.innerHTML = '<p class="placeholder-text">-</p>';
+            return;
+        }
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'control-btn';
+            btn.textContent = item;
+            btn.dataset.value = item;
+            if (item === activeItem) btn.classList.add('active');
+            btn.addEventListener('click', () => onClick(item));
+            container.appendChild(btn);
+        });
     }
     
-    // --- NEW: ASSIGNMENTS TABLE RENDERER ---
     function renderAssignmentsTable() {
         assignmentsTableBody.innerHTML = '';
         const playerOrder = ['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'];
-
         const finalAssignments = calculateFinalAssignments();
-
         playerOrder.forEach(player => {
             const routeKey = finalAssignments[player];
             const routeName = routeKey ? state.playbook.routeLibrary[routeKey]?.name || routeKey : '-';
-            
             const row = assignmentsTableBody.insertRow();
-            const cellPos = row.insertCell(0);
-            const cellAssign = row.insertCell(1);
-
-            cellPos.textContent = player;
-            cellAssign.textContent = routeName;
+            row.insertCell(0).textContent = player;
+            row.insertCell(1).textContent = routeName;
         });
     }
-
 
     // --- EVENT HANDLERS ---
     function handleFormationSelect(formationName) {
@@ -125,14 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleConceptSelect(conceptName, side) {
-        // ... (same as before)
+        if (side === 'left') state.selectedLeftConcept = (state.selectedLeftConcept === conceptName) ? null : conceptName;
+        if (side === 'right') state.selectedRightConcept = (state.selectedRightConcept === conceptName) ? null : conceptName;
+        state.selectedLeftConcept = state.selectedLeftConcept === conceptName && side === 'left' ? null : state.selectedLeftConcept;
+        if (state.playbook.concepts.fullField[state.selectedLeftConcept]) resetSelections(['selectedRightConcept', 'selectedModifier']);
+        applySideConcepts();
+        renderUI();
     }
     
     const handleLeftConceptSelect = (name) => handleConceptSelect(name, 'left');
     const handleRightConceptSelect = (name) => handleConceptSelect(name, 'right');
 
     function handleFullFieldSelect(playName) {
-        // ... (same as before)
+        const isDeselecting = state.selectedLeftConcept === playName;
+        resetSelections(['selectedLeftConcept', 'selectedRightConcept', 'selectedModifier']);
+        if (!isDeselecting) {
+            const play = state.playbook.concepts.fullField[playName];
+            if (play) {
+                state.currentAssignments = { ...play.assignments };
+                state.selectedLeftConcept = playName;
+            }
+        }
+        renderUI();
     }
     
     function handleModifierSelect(modifierName) {
@@ -141,13 +196,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleFileUpload(event) {
-        // ... (same as before)
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const customPlaybook = JSON.parse(e.target.result);
+                localStorage.setItem('customPlaybook', JSON.stringify(customPlaybook));
+                resetPlay();
+            } catch (error) {
+                console.error("Error parsing playbook file:", error);
+                alert("Invalid playbook file. Please upload a valid JSON file.");
+            }
+        };
+        reader.readAsText(file);
+        playbookFileInput.value = '';
+    }
+
+    function handleLoadDefault() {
+        localStorage.removeItem('customPlaybook');
+        resetPlay();
     }
 
     // --- LOGIC ---
     function resetPlay() {
         resetSelections();
-        renderUI();
+        initializeApp();
     }
 
     function resetSelections(props = Object.keys(state).filter(k => k.startsWith('selected'))) {
@@ -155,19 +229,20 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentAssignments = {};
     }
 
+
+
     function applyFormation() {
         state.currentAssignments = {};
         if (!state.selectedBaseFormation || !state.selectedStrength) return;
 
-        // Set default assignments
         state.currentAssignments['H'] = 'block';
         state.currentAssignments['C'] = 'block';
-        state.currentAssignments['Q'] = 'block'; // QB is implicitly a passer, 'block' here means non-receiver
+        state.currentAssignments['Q'] = 'block';
 
         const formationData = state.playbook.formations[state.selectedBaseFormation][state.selectedStrength];
         Object.keys(formationData.positions).forEach(player => {
             if (!state.currentAssignments[player]) {
-                state.currentAssignments[player] = null; // Placeholder for receivers
+                state.currentAssignments[player] = null;
             }
         });
     }
@@ -179,7 +254,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyConceptToSide(conceptName, side) {
-        // ... (same as before)
+        const formationData = state.playbook.formations[state.selectedBaseFormation][state.selectedStrength];
+        const sideInfo = formationData.sides[side];
+        const countMap = { 1: 'oneMan', 2: 'twoMan', 3: 'threeMan' };
+        let concept;
+        
+        for (const type in countMap) {
+            const conceptTypeKey = countMap[type];
+            if(state.playbook.concepts[conceptTypeKey][conceptName]) {
+                concept = state.playbook.concepts[conceptTypeKey][conceptName];
+                break;
+            }
+        }
+        
+        if (!concept) return;
+
+        if (concept.usesCenter && sideInfo.count === 2) {
+            state.currentAssignments[sideInfo.players.outer] = concept.assignments.outer;
+            state.currentAssignments[sideInfo.players.inner] = concept.assignments.middle;
+            state.currentAssignments['C'] = concept.assignments.inner;
+        } else {
+            for (const position in concept.assignments) {
+                const player = sideInfo.players[position];
+                if (player) {
+                    state.currentAssignments[player] = concept.assignments[position];
+                }
+            }
+        }
     }
 
     function calculateFinalAssignments() {
@@ -196,9 +297,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyTightFormation(positions, spacing) {
-        // ... (same as before)
-    }
+        const compressedPositions = JSON.parse(JSON.stringify(positions));
+        const centerPos = compressedPositions['C'];
+        if (!centerPos) return compressedPositions;
 
+        const linePlayers = Object.keys(positions).filter(p => p !== 'Q' && p !== 'H' && positions[p].y < 400);
+        
+        const leftSide = linePlayers.filter(p => positions[p].x < centerPos.x).sort((a, b) => positions[b].x - positions[a].x);
+        const rightSide = linePlayers.filter(p => positions[p].x > centerPos.x).sort((a, b) => positions[a].x - positions[b].x);
+
+        leftSide.forEach((player, i) => {
+            compressedPositions[player].x = centerPos.x - (spacing * (i + 1));
+        });
+        rightSide.forEach((player, i) => {
+            compressedPositions[player].x = centerPos.x + (spacing * (i + 1));
+        });
+
+        return compressedPositions;
+    }
 
     // --- DRAWING ---
     function drawField() {
@@ -213,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let finalAssignments = calculateFinalAssignments();
         let finalPositions = JSON.parse(JSON.stringify(formation.positions));
 
-        // Apply Position-Altering Modifiers
         if (selectedModifier && playbook.modifiers[selectedModifier]) {
             const modifier = playbook.modifiers[selectedModifier];
             
@@ -265,8 +380,25 @@ document.addEventListener('DOMContentLoaded', () => {
             path.setAttribute('stroke-width', '3');
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke-linecap', 'round');
+            // Arrowhead definition would go in SVG <defs> for better performance
+            const defs = playCanvas.querySelector('defs') || document.createElementNS(svgNamespace, 'defs');
+            if (!defs.querySelector('#arrow')) {
+                const marker = document.createElementNS(svgNamespace, 'marker');
+                marker.setAttribute('id', 'arrow');
+                marker.setAttribute('viewBox', '0 0 10 10');
+                marker.setAttribute('refX', '8');
+                marker.setAttribute('refY', '5');
+                marker.setAttribute('markerWidth', '6');
+                marker.setAttribute('markerHeight', '6');
+                marker.setAttribute('orient', 'auto-start-reverse');
+                const arrowPath = document.createElementNS(svgNamespace, 'path');
+                arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+                arrowPath.setAttribute('fill', 'yellow');
+                marker.appendChild(arrowPath);
+                defs.appendChild(marker);
+                playCanvas.prepend(defs);
+            }
             path.setAttribute('marker-end', 'url(#arrow)');
-            // Flip path for right side if needed (future feature)
             group.appendChild(path);
         }
 
