@@ -166,10 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleConceptSelect(conceptName, side) {
-        if (side === 'left') state.selectedLeftConcept = (state.selectedLeftConcept === conceptName) ? null : conceptName;
-        if (side === 'right') state.selectedRightConcept = (state.selectedRightConcept === conceptName) ? null : conceptName;
-        state.selectedLeftConcept = state.selectedLeftConcept === conceptName && side === 'left' ? null : state.selectedLeftConcept;
-        if (state.playbook.concepts.fullField[state.selectedLeftConcept]) resetSelections(['selectedRightConcept', 'selectedModifier']);
+        if (side === 'left') {
+            state.selectedLeftConcept = (state.selectedLeftConcept === conceptName) ? null : conceptName;
+        }
+        if (side === 'right') {
+            state.selectedRightConcept = (state.selectedRightConcept === conceptName) ? null : conceptName;
+        }
+        
+        // If a full field play was selected, deselect other concepts
+        if (state.playbook.concepts.fullField[state.selectedLeftConcept]) {
+            resetSelections(['selectedRightConcept', 'selectedModifier']);
+        }
+
         applySideConcepts();
         renderUI();
     }
@@ -184,8 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const play = state.playbook.concepts.fullField[playName];
             if (play) {
                 state.currentAssignments = { ...play.assignments };
-                state.selectedLeftConcept = playName;
+                state.selectedLeftConcept = playName; // Use left concept as the flag for a full-field play
             }
+        } else {
+             applyFormation(); // if deselecting, revert to base formation assignments
         }
         renderUI();
     }

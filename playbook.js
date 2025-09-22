@@ -3,8 +3,9 @@ const defaultPlaybook = {
     "go": { "name": "Go", "path": "M 0 0 V -220" },
     "post": { "name": "Post", "path": "M 0 0 V -60 L 80 -180" },
     "corner": { "name": "Corner", "path": "M 0 0 V -60 L -80 -180" },
-    "scissors_post": { "name": "Scissors Post", "path": "M 0 0 v -120 L 80 -180" },
-    "scissors_corner": { "name": "Scissors Corner", "path": "M 0 0 v -120 L -80 -180" },
+    // CORRECTED: New routes for a true crossing "Scissors" concept
+    "scissors_deep_in": { "name": "Scissors Deep In", "path": "M 0 0 v -120 L 80 -200" },
+    "scissors_shallow_in": { "name": "Scissors Shallow In", "path": "M 0 0 v -80 L 100 -160" },
     "out": { "name": "Out", "path": "M 0 0 V -100 H 100" },
     "in": { "name": "In/Dig", "path": "M 0 0 V -120 H -120" },
     "slant": { "name": "Slant", "path": "M 0 0 L -60 -60" },
@@ -42,7 +43,7 @@ const defaultPlaybook = {
   },
   "concepts": {
       "oneMan": { "Go": { "assignments": { "outer": "go" } }, "Slant": { "assignments": { "outer": "slant" } }, "In": { "assignments": { "outer": "in" } }, "Houston": { "assignments": { "outer": "hitch_6yd" } } },
-      "twoMan": { "Houston": { "assignments": { "outer": "hitch_6yd", "inner": "hitch_6yd" } }, "Dallas": { "assignments": { "outer": "dallas_slant", "inner": "now_go" } }, "Scissors": { "assignments": { "outer": "scissors_post", "inner": "scissors_corner" } } },
+      "twoMan": { "Houston": { "assignments": { "outer": "hitch_6yd", "inner": "hitch_6yd" } }, "Dallas": { "assignments": { "outer": "dallas_slant", "inner": "now_go" } }, "Scissors": { "assignments": { "outer": "scissors_deep_in", "inner": "scissors_shallow_in" } } },
       "threeMan": { "Houston": { "assignments": { "outer": "hitch_6yd", "middle": "hitch_6yd", "inner": "hitch_6yd" } }, "Fresno": { "usesCenter": true, "assignments": { "outer": "fresno_go", "middle": "fresno_sit", "inner": "fresno_drag" } }, "Spacing": { "assignments": { "outer": "hitch_6yd", "middle": "flat", "inner": "slant" } } },
       "fullField": {
           "Yale": { "name": "Yale Screen", "formation": "Empty Lt", "assignments": { "X": "screen_rcv", "F": "screen_block", "Y": "screen_block", "Z": "go", "H": "slant", "C": "block", "Q": "block" } },
