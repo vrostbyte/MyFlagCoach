@@ -1,69 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>MyFlagCoach v2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Flag Football Playmaker</title>
     <link rel="stylesheet" href="style.css">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="signals/icon.png"> <!-- Optional: for home screen icon -->
 </head>
+
 <body>
-    <div id="app-container">
-        <!-- Main Control Panel / Sidebar -->
-        <div id="control-panel">
-            <header class="panel-header">
-                <h1>MyFlagCoach</h1>
-                <div class="playbook-manager">
-                    <label for="playbook-upload" class="button button-upload">Upload Playbook</label>
-                    <input type="file" id="playbook-upload" accept=".json" style="display: none;">
-                    <button id="reset-playbook" class="button button-secondary">Reset</button>
-                </div>
+    <div id="app">
+        <aside class="control-panel">
+            <header>
+                <h1>Play Constructor</h1>
+                <p id="current-play-display">Build your play...</p>
             </header>
 
-            <div class="panel-section">
-                <h2>1. Select Defense</h2>
-                <div id="defense-selector" class="button-grid">
-                    <!-- Defensive formation buttons will be generated here -->
-                </div>
-            </div>
-
-            <div class="panel-section">
-                <h2>2. Choose Formation</h2>
-                <div id="formation-selector" class="button-grid">
+            <div class="control-group" id="step1">
+                <h2>1. Formation</h2>
+                <div id="formation-buttons" class="button-grid">
                     <!-- Formation buttons will be generated here -->
                 </div>
             </div>
 
-            <div class="panel-section" id="recommended-plays-section">
-                <h2>3. Recommended Plays</h2>
-                <div id="play-selector" class="play-list">
-                    <!-- Play buttons/list will be generated here -->
+            <div class="control-group" id="step2">
+                <h2>2. Left Side Concept</h2>
+                <div id="left-concept-buttons" class="button-grid">
+                    <p class="placeholder">Select a Formation</p>
                 </div>
             </div>
             
-            <footer class="panel-footer">
-                <div id="signal-display">
-                    <!-- Hand signals will appear here -->
+            <div class="control-group" id="step3">
+                <h2>3. Right Side Concept</h2>
+                <div id="right-concept-buttons" class="button-grid">
+                    <p class="placeholder">Select a Formation</p>
                 </div>
-            </footer>
-        </div>
+            </div>
 
-        <!-- Main Content Area for Play Display -->
-        <div id="main-content">
-            <div id="play-display-header">
-                <span id="current-play-title">Load a playbook to get started</span>
+            <div class="control-group" id="step4">
+                <h2>4. Modifiers</h2>
+                <div id="modifier-buttons" class="button-grid">
+                     <p class="placeholder">Select a Formation</p>
+                </div>
             </div>
-            <div id="play-canvas-container">
-                <svg id="play-canvas" viewBox="0 0 700 550">
-                    <g id="field-markings"></g>
-                    <g id="play-drawing"></g>
-                </svg>
-            </div>
-        </div>
+
+            <footer>
+                <button id="reset-button">Reset Play</button>
+            </footer>
+        </aside>
+
+        <main class="canvas-container">
+            <svg id="play-canvas" viewBox="0 0 700 600"></svg>
+        </main>
     </div>
 
-    <script src="playbook.js"></script>
+    <!-- Import our JavaScript files -->
+    <script src="playbook.js"></script> <!-- This will be your editable playbook file -->
     <script src="app.js"></script>
 </body>
+
 </html>
+

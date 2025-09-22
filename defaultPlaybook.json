@@ -1,0 +1,56 @@
+{
+  "routeLibrary": {
+    "go": { "name": "Go/Houston", "path": "M 0 0 V -220" },
+    "post": { "name": "Post", "path": "M 0 0 V -40 L 80 -160" },
+    "corner": { "name": "Corner", "path": "M 0 0 V -40 L -80 -160" },
+    "out": { "name": "Out", "path": "M 0 0 V -80 H 100" },
+    "in": { "name": "In/Dig", "path": "M 0 0 V -80 H -100" },
+    "slant": { "name": "Slant", "path": "M 0 0 L -60 -60" },
+    "hitch": { "name": "Hitch", "path": "M 0 0 V -40" },
+    "flat": { "name": "Flat", "path": "M 0 0 C 20 -5, 40 -5, 60 0 H 100" },
+    "shallow": { "name": "Shallow Cross", "path": "M 0 0 C 100 -20, 250 -20, 400 0" },
+    "deepCross": { "name": "Deep Cross", "path": "M 0 0 C 150 -150, 300 -180, 400 -180" },
+    "comeback": { "name": "Comeback", "path": "M 0 0 V -120 L -20 -100" },
+    "block": { "name": "Block", "path": "" },
+    "swingR": { "name": "Swing Right", "path": "M 0 0 C 50 30, 150 30, 200 10" },
+    "swingL": { "name": "Swing Left", "path": "M 0 0 C -50 30, -150 30, -200 10" }
+  },
+  "formations": {
+    "Trips Lt": { 
+        "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "Y": { "x": 260, "y": 380 }, "C": { "x": 450, "y": 390 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 450, "y": 480 }, "H": { "x": 520, "y": 480 } },
+        "sides": {
+            "left": { "count": 3, "players": { "outer": "X", "middle": "F", "inner": "Y" } },
+            "right": { "count": 1, "players": { "outer": "Z" } }
+        }
+    },
+    "Divide Lt": {
+        "positions": { "X": { "x": 100, "y": 380 }, "Y": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "F": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 420, "y": 480 } },
+        "sides": {
+            "left": { "count": 2, "players": { "outer": "X", "inner": "Y" } },
+            "right": { "count": 2, "players": { "outer": "Z", "inner": "F" } }
+        }
+    }
+  },
+  "concepts": {
+      "twoMan": {
+          "Houston": { "assignments": { "outer": "go", "inner": "hitch" } },
+          "Dallas": { "assignments": { "outer": "comeback", "inner": "in" } },
+          "Scissors": { "assignments": { "outer": "post", "inner": "corner" } }
+      },
+      "threeMan": {
+          "Fresno": { "assignments": { "outer": "comeback", "middle": "out", "inner": "flat" } },
+          "Spacing": { "assignments": { "outer": "hitch", "middle": "flat", "inner": "slant" } }
+      },
+      "oneMan": {
+          "Go": { "assignments": { "outer": "go" } },
+          "Slant": { "assignments": { "outer": "slant" } },
+          "In": { "assignments": { "outer": "in" } }
+      }
+  },
+  "modifiers": {
+    "Max": { "H": "block" },
+    "Houston Z": { "Z": "go" },
+    "Houston X": { "X": "go" }
+  }
+}
+

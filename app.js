@@ -1,272 +1,302 @@
 // app.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- APPLICATION STATE ---
-    let playbook = null;
-    let selectedDefense = null;
-    let selectedFormation = null;
-    let selectedPlay = null;
+    // --- STATE MANAGEMENT ---
+    let state = {
+        playbook: null,
+        selectedFormation: null,
+        selectedLeftConcept: null,
+        selectedRightConcept: null,
+        activeModifiers: new Set(),
+    };
 
     // --- DOM ELEMENT REFERENCES ---
-    const defenseSelector = document.getElementById('defense-selector');
-    const formationSelector = document.getElementById('formation-selector');
-    const playSelector = document.getElementById('play-selector');
-    const playDrawingContainer = document.getElementById('play-drawing');
-    const signalDisplayContainer = document.getElementById('signal-display');
-    const currentPlayTitle = document.getElementById('current-play-title');
-    const playbookUpload = document.getElementById('playbook-upload');
-    const resetPlaybookBtn = document.getElementById('reset-playbook');
-    const recommendedPlaysSection = document.getElementById('recommended-plays-section');
+    const dom = {
+        formationButtons: document.getElementById('formation-buttons'),
+        leftConceptButtons: document.getElementById('left-concept-buttons'),
+        rightConceptButtons: document.getElementById('right-concept-buttons'),
+        modifierButtons: document.getElementById('modifier-buttons'),
+        playCanvas: document.getElementById('play-canvas'),
+        display: document.getElementById('current-play-display'),
+        resetButton: document.getElementById('reset-button'),
+        step2: document.getElementById('step2'),
+        step3: document.getElementById('step3'),
+        step4: document.getElementById('step4'),
+    };
+
     const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
     // --- INITIALIZATION ---
-    function initializeApp() {
-        loadPlaybook();
-        renderControls();
-        addEventListeners();
+    function init() {
+        state.playbook = defaultPlaybook; // Load the playbook from playbook.js
+        populateFormationButtons();
+        resetUIState();
+        drawField(); // Initial draw of the empty field
+        dom.resetButton.addEventListener('click', resetSelection);
     }
 
-    // --- PLAYBOOK MANAGEMENT ---
-    function loadPlaybook() {
-        const savedPlaybook = localStorage.getItem('customPlaybook');
-        if (savedPlaybook) {
-            playbook = JSON.parse(savedPlaybook);
-        } else {
-            playbook = defaultPlaybook;
-        }
+    // --- UI POPULATION ---
+
+    function populateFormationButtons() {
+        createButtons(Object.keys(state.playbook.formations), dom.formationButtons, handleFormationClick);
     }
 
-    function savePlaybook() {
-        localStorage.setItem('customPlaybook', JSON.stringify(playbook));
-    }
+    function populateConceptButtons() {
+        if (!state.selectedFormation) return;
 
-    function handlePlaybookUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        const formationData = state.playbook.formations[state.selectedFormation];
+        
+        // Populate Left Concepts
+        const leftCount = formationData.sides.left.count;
+        const leftConcepts = getConceptsByPlayerCount(leftCount);
+        createButtons(Object.keys(leftConcepts), dom.leftConceptButtons, handleLeftConceptClick);
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const newPlaybook = JSON.parse(e.target.result);
-                playbook = newPlaybook;
-                savePlaybook();
-                resetSelections();
-                renderControls();
-            } catch (error) {
-                alert('Error parsing playbook file. Please ensure it is a valid JSON file.');
-                console.error("Playbook parsing error:", error);
-            }
-        };
-        reader.readAsText(file);
+        // Populate Right Concepts
+        const rightCount = formationData.sides.right.count;
+        const rightConcepts = getConceptsByPlayerCount(rightCount);
+        createButtons(Object.keys(rightConcepts), dom.rightConceptButtons, handleRightConceptClick);
     }
     
-    function handleResetPlaybook() {
-        if (confirm('Are you sure you want to reset to the default playbook? This will erase your uploaded playbook.')) {
-            localStorage.removeItem('customPlaybook');
-            playbook = defaultPlaybook;
-            resetSelections();
-            renderControls();
-        }
-    }
-    
-    function resetSelections() {
-        selectedDefense = null;
-        selectedFormation = null;
-        selectedPlay = null;
-        updateUI();
-    }
-
-    // --- UI RENDERING ---
-    function renderControls() {
-        renderSelector('defense', playbook.defenses, defenseSelector, handleDefenseSelect);
-        renderSelector('formation', Object.keys(playbook.formations), formationSelector, handleFormationSelect);
-        updateUI(); // Initial UI update
-    }
-
-    function renderSelector(type, items, container, handler) {
-        container.innerHTML = '';
-        items.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = 'selector-btn';
-            btn.textContent = item;
-            btn.dataset.type = type;
-            btn.dataset.value = item;
-            btn.addEventListener('click', () => handler(item, btn));
-            container.appendChild(btn);
-        });
-    }
-
-    function updateUI() {
-        // Update active buttons
-        updateActiveButton('defense', selectedDefense, defenseSelector);
-        updateActiveButton('formation', selectedFormation, formationSelector);
-
-        // Filter and render plays
-        const playsToRender = getFilteredPlays();
-        renderPlays(playsToRender);
-        updateActiveButton('play', selectedPlay, playSelector);
-
-        // Draw the selected play
-        drawPlay();
-
-        // Update titles and signals
-        updateHeader();
-        updateSignalDisplay();
-    }
-
-    function updateActiveButton(type, selectedValue, container) {
-        container.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
-            if (btn.dataset.value === selectedValue) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    
-    function renderPlays(playNames) {
-        playSelector.innerHTML = '';
-        if (playNames.length === 0) {
-            recommendedPlaysSection.style.display = 'none';
-            return;
-        }
-        recommendedPlaysSection.style.display = 'block';
-        playNames.forEach(playName => {
-            const play = playbook.plays[playName];
-            const btn = document.createElement('button');
-            btn.className = 'selector-btn';
-            btn.textContent = play.name;
-            btn.dataset.type = 'play';
-            btn.dataset.value = playName;
-            btn.addEventListener('click', () => handlePlaySelect(playName, btn));
-            playSelector.appendChild(btn);
-        });
+    function populateModifierButtons() {
+        createButtons(Object.keys(state.playbook.modifiers), dom.modifierButtons, handleModifierClick, 'modifier');
     }
 
     // --- EVENT HANDLERS ---
-    function addEventListeners() {
-        playbookUpload.addEventListener('change', handlePlaybookUpload);
-        resetPlaybookBtn.addEventListener('click', handleResetPlaybook);
+
+    function handleFormationClick(formationName) {
+        if (state.selectedFormation === formationName) return; // No change
+        
+        resetSelection(false); // Soft reset, keeps the formation
+        state.selectedFormation = formationName;
+        
+        updateActiveButton(dom.formationButtons, formationName);
+        populateConceptButtons();
+        populateModifierButtons();
+        updateUIState();
+        drawPlay();
     }
 
-  	function handleDefenseSelect(defense, btn) {
-        selectedDefense = selectedDefense === defense ? null : defense;
-        selectedPlay = null; // Reset play selection when defense changes
-        updateUI();
-    }
-    
-    function handleFormationSelect(formation, btn) {
-        selectedFormation = selectedFormation === formation ? null : formation;
-        selectedPlay = null; // Reset play selection when formation changes
-        updateUI();
-    }
-    
-    function handlePlaySelect(playName, btn) {
-        selectedPlay = selectedPlay === playName ? null : playName;
-        updateUI();
+    function handleLeftConceptClick(conceptName) {
+        state.selectedLeftConcept = conceptName;
+        updateActiveButton(dom.leftConceptButtons, conceptName);
+        drawPlay();
     }
 
-    // --- LOGIC & DRAWING ---
-    function getFilteredPlays() {
-        if (!selectedDefense) {
-            return Object.keys(playbook.plays); // Return all plays if no defense is selected
+    function handleRightConceptClick(conceptName) {
+        state.selectedRightConcept = conceptName;
+        updateActiveButton(dom.rightConceptButtons, conceptName);
+        drawPlay();
+    }
+
+    function handleModifierClick(modifierName, btn) {
+        if (state.activeModifiers.has(modifierName)) {
+            state.activeModifiers.delete(modifierName);
+            btn.classList.remove('active');
+        } else {
+            state.activeModifiers.add(modifierName);
+            btn.classList.add('active');
         }
-        return Object.keys(playbook.plays).filter(playName => {
-            const play = playbook.plays[playName];
-            return play.strongAgainst && play.strongAgainst.includes(selectedDefense);
-        });
+        drawPlay();
+    }
+    
+    function resetSelection(fullReset = true) {
+        state.selectedLeftConcept = null;
+        state.selectedRightConcept = null;
+        state.activeModifiers.clear();
+        
+        if (fullReset) {
+            state.selectedFormation = null;
+            resetUIState();
+            drawField();
+        } else {
+             // Clear concepts but keep formation
+            dom.leftConceptButtons.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+            dom.rightConceptButtons.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        }
+        
+        dom.modifierButtons.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        updateDisplay();
+    }
+
+    // --- DRAWING LOGIC ---
+
+    function drawField() {
+        dom.playCanvas.innerHTML = ''; // Clear canvas
+        // Line of Scrimmage
+        const line = document.createElementNS(SVG_NAMESPACE, 'line');
+        line.setAttribute('x1', '0');
+        line.setAttribute('y1', '390');
+        line.setAttribute('x2', '700');
+        line.setAttribute('y2', '390');
+        line.setAttribute('stroke', '#ffffff');
+        line.setAttribute('stroke-width', '3');
+        line.setAttribute('stroke-dasharray', '10 10');
+        dom.playCanvas.appendChild(line);
     }
     
     function drawPlay() {
-        playDrawingContainer.innerHTML = ''; // Clear canvas
+        drawField();
+        if (!state.selectedFormation) return;
+
+        const formationData = state.playbook.formations[state.selectedFormation];
+        let finalAssignments = getFinalAssignments();
+
+        // Draw players and routes
+        for (const player in formationData.positions) {
+            const pos = formationData.positions[player];
+            const routeKey = finalAssignments[player];
+            
+            drawPlayer(player, pos, routeKey);
+        }
+        updateDisplay();
+    }
+
+    function drawPlayer(player, pos, routeKey) {
+        const routeData = state.playbook.routeLibrary[routeKey];
         
-        // Draw Line of Scrimmage
-        const line = document.createElementNS(SVG_NAMESPACE, 'line');
-        line.setAttribute('x1', '0'); line.setAttribute('y1', '385');
-        line.setAttribute('x2', '700'); line.setAttribute('y2', '385');
-        line.setAttribute('stroke', '#ffffff'); line.setAttribute('stroke-width', '3');
-        playDrawingContainer.appendChild(line);
+        const playerGroup = document.createElementNS(SVG_NAMESPACE, 'g');
+        playerGroup.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
 
-        if (!selectedFormation || !selectedPlay) return;
+        // Draw Route
+        if (routeData && routeData.path) {
+            const routePath = document.createElementNS(SVG_NAMESPACE, 'path');
+            routePath.setAttribute('d', routeData.path);
+            routePath.setAttribute('stroke', 'yellow');
+            routePath.setAttribute('stroke-width', '4');
+            routePath.setAttribute('fill', 'none');
+            routePath.setAttribute('stroke-linecap', 'round');
+            playerGroup.appendChild(routePath);
+        }
+        
+        // Draw Player Circle
+        const playerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
+        playerCircle.setAttribute('r', '18');
+        playerCircle.setAttribute('fill', '#0a84ff');
+        playerCircle.setAttribute('stroke', 'white');
+        playerCircle.setAttribute('stroke-width', '3');
+        
+        // Draw Player Label
+        const playerLabel = document.createElementNS(SVG_NAMESPACE, 'text');
+        playerLabel.setAttribute('text-anchor', 'middle');
+        playerLabel.setAttribute('dy', '.35em');
+        playerLabel.setAttribute('font-size', '20');
+        playerLabel.setAttribute('font-weight', 'bold');
+        playerLabel.setAttribute('fill', 'white');
+        playerLabel.textContent = player;
+        
+        playerGroup.appendChild(playerCircle);
+        playerGroup.appendChild(playerLabel);
+        dom.playCanvas.appendChild(playerGroup);
+    }
 
-        const formationData = playbook.formations[selectedFormation];
-        const playData = playbook.plays[selectedPlay];
+    // --- HELPER & UTILITY FUNCTIONS ---
 
-        for (const player in formationData) {
-            const pos = formationData[player];
-            const routeKey = playData.assignments[player];
-            if (!routeKey) continue;
+    function getFinalAssignments() {
+        const formationData = state.playbook.formations[state.selectedFormation];
+        let assignments = {};
 
-            const routeData = playbook.routeLibrary[routeKey];
-            const playerGroup = document.createElementNS(SVG_NAMESPACE, 'g');
-            playerGroup.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
-
-            // Draw player
-            const playerCircle = document.createElementNS(SVG_NAMESPACE, 'circle');
-            playerCircle.setAttribute('r', '18');
-            playerCircle.setAttribute('class', 'player-circle');
-            
-            const playerLabel = document.createElementNS(SVG_NAMESPACE, 'text');
-            playerLabel.setAttribute('dy', '.35em');
-            playerLabel.setAttribute('class', 'player-label');
-            playerLabel.textContent = player;
-            
-            playerGroup.appendChild(playerCircle);
-            playerGroup.appendChild(playerLabel);
-
-            // Draw route
-            if (routeKey !== 'block') {
-                const routePath = document.createElementNS(SVG_NAMESPACE, 'path');
-                routePath.setAttribute('d', routeData.path);
-                routePath.setAttribute('class', 'route-path');
-                const customColor = playData.routeColors && playData.routeColors[player];
-                routePath.setAttribute('stroke', customColor || '#f9d423');
-                playerGroup.appendChild(routePath);
-            } else {
-                 playerCircle.style.fill = '#8e8e93'; // Make blockers grey
+        // 1. Apply Left Concept
+        if (state.selectedLeftConcept) {
+            const concept = state.playbook.concepts.twoMan[state.selectedLeftConcept] || state.playbook.concepts.threeMan[state.selectedLeftConcept];
+            const sidePlayers = formationData.sides.left.players;
+            for (const role in concept.assignments) {
+                const player = sidePlayers[role];
+                assignments[player] = concept.assignments[role];
             }
-
-            playDrawingContainer.appendChild(playerGroup);
         }
+        
+        // 2. Apply Right Concept
+        if (state.selectedRightConcept) {
+            const concept = state.playbook.concepts.twoMan[state.selectedRightConcept] || state.playbook.concepts.threeMan[state.selectedRightConcept];
+            const sidePlayers = formationData.sides.right.players;
+            for (const role in concept.assignments) {
+                const player = sidePlayers[role];
+                assignments[player] = concept.assignments[role];
+            }
+        }
+
+        // 3. Fill remaining players with 'block' as a default
+        for(const player in formationData.positions){
+            if(!assignments[player]){
+                assignments[player] = 'block';
+            }
+        }
+
+        // 4. Apply Modifiers (they override everything)
+        state.activeModifiers.forEach(modName => {
+            const modifier = state.playbook.modifiers[modName];
+            for (const player in modifier) {
+                assignments[player] = modifier[player];
+            }
+        });
+        
+        return assignments;
     }
 
-    function updateHeader() {
-        if (selectedFormation && selectedPlay) {
-            currentPlayTitle.textContent = `${selectedFormation} - ${playbook.plays[selectedPlay].name}`;
-        } else if (selectedFormation) {
-            currentPlayTitle.textContent = `${selectedFormation}`;
+    function updateDisplay() {
+        const parts = [
+            state.selectedFormation,
+            state.selectedLeftConcept,
+            state.selectedRightConcept,
+            ...state.activeModifiers
+        ].filter(Boolean); // Filter out null/undefined values
+        
+        if (parts.length > 0) {
+            dom.display.textContent = parts.join(' ');
         } else {
-            currentPlayTitle.textContent = 'Select a Formation and Play';
+            dom.display.textContent = 'Build your play...';
         }
     }
 
-    function updateSignalDisplay() {
-        signalDisplayContainer.innerHTML = 'No Signals';
-        if (!playbook.handSignals) return;
-
-        const signals = [];
-        if (selectedFormation) {
-            const baseFormation = selectedFormation.split(' ')[0];
-            const path = playbook.handSignals.formations?.[baseFormation];
-            if(path) signals.push(path);
+    function createButtons(items, container, onClick, type = 'default') {
+        container.innerHTML = ''; // Clear existing buttons or placeholder
+        if (items.length === 0) {
+            container.innerHTML = '<p class="placeholder">N/A</p>';
+            return;
         }
-        if (selectedPlay) {
-            const path = playbook.handSignals.plays?.[selectedPlay];
-            if(path) signals.push(path);
-        }
-
-        if (signals.length > 0) {
-            signalDisplayContainer.innerHTML = '';
-            signals.forEach(path => {
-                const img = document.createElement('img');
-                img.src = path;
-                img.alt = "Hand Signal";
-                img.onerror = () => img.style.display = 'none'; // Hide if image is missing
-                signalDisplayContainer.appendChild(img);
-            });
-        }
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = `control-btn ${type}`;
+            btn.textContent = item;
+            btn.dataset.value = item;
+            btn.addEventListener('click', () => onClick(item, btn));
+            container.appendChild(btn);
+        });
+    }
+    
+    function getConceptsByPlayerCount(count) {
+        if (count === 2) return state.playbook.concepts.twoMan;
+        if (count === 3) return state.playbook.concepts.threeMan;
+        return {};
     }
 
+    function updateActiveButton(container, value) {
+        container.querySelectorAll('.control-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.value === value);
+        });
+    }
+
+    function resetUIState() {
+        ['.control-btn.active', '.modifier.active'].forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => el.classList.remove('active'));
+        });
+        
+        dom.leftConceptButtons.innerHTML = '<p class="placeholder">Select a Formation</p>';
+        dom.rightConceptButtons.innerHTML = '<p class="placeholder">Select a Formation</p>';
+        dom.modifierButtons.innerHTML = '<p class="placeholder">Select a Formation</p>';
+        
+        updateUIState();
+    }
+    
+    function updateUIState() {
+        // Enable/disable concept and modifier panels
+        const isFormationSelected = !!state.selectedFormation;
+        dom.step2.classList.toggle('disabled', !isFormationSelected);
+        dom.step3.classList.toggle('disabled', !isFormationSelected);
+        dom.step4.classList.toggle('disabled', !isFormationSelected);
+    }
+    
     // --- START THE APP ---
-    initializeApp();
+    init();
 });
+
