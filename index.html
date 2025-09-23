@@ -2,33 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyFlagCoach - Project Phoenix</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React Libraries -->
+    <!-- Core Libraries -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel to compile JSX -->
+    <!-- Babel for JSX Transpilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow: hidden;
-             -webkit-tap-highlight-color: transparent;
-        }
-    </style>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-200">
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- Your Playbook Data -->
-    <script src="playbook.js"></script>
-    
-    <!-- Your React App -->
-    <script type="text/babel" src="app.jsx"></script>
-
+    <!-- 
+      SCRIPT LOADING ORDER IS CRITICAL HERE:
+      1. Load the playbook data first, making the 'playbook' variable globally available.
+      2. Load the main app component, which depends on React, ReactDOM, and the playbook data.
+    -->
+    <script src="./playbook.js"></script>
+    <script type="text/babel" src="./app.jsx"></script>
 </body>
 </html>
 

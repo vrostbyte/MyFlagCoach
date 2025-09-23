@@ -1,11 +1,10 @@
 /**
  * MyFlagCoach Playbook - Project Phoenix
- * This file contains all the core data for the playbook.
- * It uses the "Playbook Studio" architecture, where routes are defined
- * by their steps, making them more accurate and easier to edit.
+ * This file is now a simple script that defines a global 'playbook' variable.
+ * The 'export' keyword has been removed to simplify loading in the browser.
  */
 
-export const playbook = {
+const playbook = {
     // Master library of all possible routes. Routes are defined by steps.
     routeLibrary: {
         // Universal Routes

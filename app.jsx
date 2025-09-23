@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom/client';
-import { playbook } from './playbook.js';
-
 /**
  * MyFlagCoach App - Project Phoenix
  * The core React component for the application.
+ * This version removes all module 'import' statements to work directly in the browser.
  */
+
+// Since React and ReactDOM are loaded globally from the <script> tags in index.html,
+// we can use them directly without importing. The same applies to the 'playbook' variable.
+const { useState, useMemo } = React;
+
 const App = () => {
     // --- STATE MANAGEMENT ---
-    // Stores the entire playbook data
+    // The playbook object is now available globally from playbook.js
     const [currentPlaybook, setCurrentPlaybook] = useState(playbook);
     
     // Tracks the user's selections in the play-calling process
@@ -20,15 +22,12 @@ const App = () => {
     const [activeModifiers, setActiveModifiers] = useState([]);
 
     // --- COMPUTED VALUES (MEMOIZED FOR PERFORMANCE) ---
-    // These values are recalculated only when their dependencies change
 
-    // Determines the full, active formation object (e.g., playbook.formations.Trips.Lt)
     const activeFormation = useMemo(() => {
         if (!selectedFormation || !selectedStrength) return null;
         return currentPlaybook.formations[selectedFormation]?.[selectedStrength];
     }, [selectedFormation, selectedStrength, currentPlaybook]);
 
-    // Calculates all player assignments based on selections
     const playerAssignments = useMemo(() => {
         if (!activeFormation) return { routes: {}, positions: {} };
 
@@ -36,7 +35,7 @@ const App = () => {
         let basePositions = { ...activeFormation.positions };
 
         // Default blocking assignments
-        if (!basePositions.H) routes.H = "block";
+        if (basePositions.H) routes.H = "block"; // Only if H exists in the formation
         routes.C = "block";
 
         const applyConcept = (concept, side) => {
@@ -45,11 +44,9 @@ const App = () => {
             const players = [...sideInfo.players];
             let conceptDefinition = playbook.concepts[`${players.length}Man`]?.[concept];
             
-            // Handle side-specific logic for mirrored routes
             const routeSuffix = side === 'left' ? '_L' : '_R';
 
             if (conceptDefinition) {
-                 // Special rule for Fresno using the Center
                 if (conceptDefinition.usesCenter && players.length < 3) {
                     players.push('C');
                 }
@@ -57,7 +54,12 @@ const App = () => {
                 Object.entries(conceptDefinition.assignments).forEach(([index, routeKey]) => {
                     const player = players[index];
                     if (player) {
-                        routes[player] = routeKey + routeSuffix;
+                        // Check if a side-specific version of the route exists
+                        if (playbook.routeLibrary[routeKey + routeSuffix]) {
+                            routes[player] = routeKey + routeSuffix;
+                        } else {
+                            routes[player] = routeKey; // Fallback to non-suffixed version
+                        }
                     }
                 });
             }
@@ -80,7 +82,6 @@ const App = () => {
             if (modifier.type === 'positional') {
                 routes[modifier.player] = modifier.assignment;
                 if (modifier.position === 'mirrorH' && finalPositions.H && finalPositions.Q) {
-                    const qPos = finalPositions.Q;
                     const hPos = finalPositions.H;
                     finalPositions[modifier.player] = { x: -hPos.x, y: hPos.y };
                 }
@@ -106,7 +107,6 @@ const App = () => {
 
     // --- EVENT HANDLERS ---
     
-    // Resets the entire play call
     const resetPlay = () => {
         setSelectedFormation(null);
         setSelectedStrength(null);
@@ -151,21 +151,11 @@ const App = () => {
 
     // --- RENDER LOGIC ---
 
-    // Converts a route's steps into an SVG path string
-    const routeToPath = (routeKey, startPos, playerSide) => {
+    const routeToPath = (routeKey, startPos) => {
         if (!routeKey) return "";
         
-        let finalRouteKey = routeKey;
-        // Auto-append side suffix if not present
-        if (!routeKey.endsWith('_L') && !routeKey.endsWith('_R')) {
-            const suffix = playerSide === 'left' ? '_L' : '_R';
-            if (currentPlaybook.routeLibrary[routeKey + suffix]) {
-                 finalRouteKey = routeKey + suffix;
-            }
-        }
-
-        const route = currentPlaybook.routeLibrary[finalRouteKey];
-        if (!route || route.steps.length === 0) return "";
+        const route = currentPlaybook.routeLibrary[routeKey];
+        if (!route || !route.steps || route.steps.length === 0) return "";
     
         let path = `M ${startPos.x} ${startPos.y}`;
         let currentX = startPos.x;
@@ -186,9 +176,11 @@ const App = () => {
                     break;
                 case 'release':
                     const relRadians = (step.angle - 90) * (Math.PI / 180);
-                    currentX += Math.cos(relRadians) * step.yards * YARD_SCALE;
-                    currentY += Math.sin(relRadians) * step.yards * YARD_SCALE;
-                    path += ` l ${Math.cos(relRadians) * step.yards * YARD_SCALE} ${Math.sin(relRadians) * step.yards * YARD_SCALE}`;
+                    const dX = Math.cos(relRadians) * step.yards * YARD_SCALE;
+                    const dY = Math.sin(relRadians) * step.yards * YARD_SCALE;
+                    currentX += dX;
+                    currentY += dY;
+                    path += ` l ${dX} ${dY}`;
                     break;
                 case 'drag':
                     currentX += (step.direction === 'left' ? -1 : 1) * step.yards * YARD_SCALE;
@@ -208,7 +200,6 @@ const App = () => {
         return path;
     };
 
-    // Generates the buttons for a concept category
     const renderConceptButtons = (side) => {
         if (!activeFormation) return null;
 
@@ -216,14 +207,15 @@ const App = () => {
         const numPlayers = sideInfo.players.length;
         const conceptCategory = `${numPlayers}Man`;
         const concepts = currentPlaybook.concepts[conceptCategory];
+        if (!concepts) return null; // Return null if no concepts for this number of players
+
         const selectedConcept = side === 'left' ? leftConcept : rightConcept;
 
         return (
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-lg shadow p-4 text-gray-900">
                 <h2 className="text-xl font-bold mb-3 border-b pb-2 capitalize">{side} Side Concepts</h2>
                  <div className="grid grid-cols-2 gap-2">
                     {Object.keys(concepts).map(conceptName => {
-                         // Logic to only show Spacing for Bunch formation
                         const conceptDef = concepts[conceptName];
                         if (conceptDef.formation && conceptDef.formation !== selectedFormation) {
                             return null;
@@ -280,9 +272,8 @@ const App = () => {
                     <div className="space-y-4">
                         {renderConceptButtons('left')}
                         {renderConceptButtons('right')}
-                         {/* Full Field Plays */}
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <h2 className="text-xl font-bold mb-3 border-b pb-2 text-gray-900">Full Field Plays</h2>
+                        <div className="bg-white rounded-lg shadow p-4 text-gray-900">
+                            <h2 className="text-xl font-bold mb-3 border-b pb-2">Full Field Plays</h2>
                             <div className="grid grid-cols-2 gap-2">
                                 {Object.entries(currentPlaybook.concepts.fullField).map(([key, play]) => (
                                     play.formation === `${selectedFormation} ${selectedStrength}` && (
@@ -313,7 +304,6 @@ const App = () => {
                 {/* Field View */}
                 <div className="flex-grow bg-white rounded-lg shadow-inner relative">
                     <svg width="100%" height="100%" viewBox="-350 -250 700 300">
-                        {/* Yard Markers */}
                         <g className="yard-markers" opacity="0.3">
                             <line x1="-350" y1="-10" x2="350" y2="-10" stroke="#4a5568" strokeWidth="1" />
                              {Array.from({ length: 13 }).map((_, i) => (
@@ -325,14 +315,12 @@ const App = () => {
                         <g className="routes">
                             {Object.entries(playerAssignments.routes).map(([player, routeKey]) => {
                                 const startPos = playerAssignments.positions[player];
-                                const playerSide = Object.values(activeFormation?.sides.left.players || []).includes(player) ? 'left' : 'right';
                                 if (!startPos) return null;
-                                const pathData = routeToPath(routeKey, startPos, playerSide);
+                                const pathData = routeToPath(routeKey, startPos);
                                 return <path key={player} d={pathData} stroke="#e53e3e" strokeWidth="3" fill="none" markerEnd="url(#arrow)" />;
                             })}
                         </g>
 
-                         {/* Player Positions */}
                         <g className="players">
                              {Object.entries(playerAssignments.positions).map(([player, pos]) => (
                                 <g key={player} transform={`translate(${pos.x}, ${pos.y})`}>
@@ -342,7 +330,6 @@ const App = () => {
                             ))}
                         </g>
                         
-                         {/* SVG Arrowhead Definition */}
                         <defs>
                             <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
                                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#e53e3e" />
@@ -350,16 +337,19 @@ const App = () => {
                         </defs>
                     </svg>
                 </div>
-                 {/* Assignments Table */}
                 <div className="h-48 bg-white mt-6 rounded-lg shadow p-4 overflow-y-auto text-gray-900">
                     <h3 className="text-2xl font-bold mb-2">Player Responsibilities</h3>
                     <div className="grid grid-cols-4 gap-4">
-                        {['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'].map(player => (
-                            <div key={player} className="flex items-baseline">
-                                <span className="font-bold text-lg w-8">{player}:</span>
-                                <span className="text-gray-700 capitalize">{(currentPlaybook.routeLibrary[playerAssignments.routes[player]]?.name || playerAssignments.routes[player] || 'Block')}</span>
-                            </div>
-                        ))}
+                        {['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'].map(player => {
+                             const routeKey = playerAssignments.routes[player];
+                             const routeName = (currentPlaybook.routeLibrary[routeKey]?.name || routeKey || 'Block');
+                            return (
+                                <div key={player} className="flex items-baseline">
+                                    <span className="font-bold text-lg w-8">{player}:</span>
+                                    <span className="text-gray-700 capitalize">{routeName}</span>
+                                </div>
+                            );
+                         })}
                     </div>
                 </div>
             </div>
@@ -368,7 +358,6 @@ const App = () => {
 };
 
 // --- APPLICATION INITIALIZATION ---
-// Uses the modern React 18 createRoot API
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 
