@@ -10,19 +10,20 @@ const defaultPlaybook = {
     "dallas_slant_L": { "name": "Dallas Slant", "path": "M 0 0 v -36 L 80 -180" },
     "dallas_slant_R": { "name": "Dallas Slant", "path": "M 0 0 v -36 L -80 -180" },
     "now_seam": { "name": "Now Seam", "path": "M 0 0 V -180" },
-    
-    // CORRECTED: New, side-specific routes for Fresno
     "fresno_go_L": { "name": "Fresno Go", "path": "M 0 0 l -20 -36 v -180" },
     "fresno_sit_L": { "name": "Fresno Sit", "path": "M 0 0 l 60 -96 l -30 20" },
     "fresno_drag_L": { "name": "Fresno Drag", "path": "M 0 0 v -24 H -250" },
     "fresno_go_R": { "name": "Fresno Go", "path": "M 0 0 l 20 -36 v -180" },
     "fresno_sit_R": { "name": "Fresno Sit", "path": "M 0 0 l -60 -96 l 30 20" },
     "fresno_drag_R": { "name": "Fresno Drag", "path": "M 0 0 v -24 H 250" },
+    
+    // CORRECTED: Mirrored hitch routes
+    "hitch_6yd_L": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l 10 10" },
+    "hitch_6yd_R": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l -10 10" },
 
     "out": { "name": "Out", "path": "M 0 0 V -100 H 100" },
     "in": { "name": "In/Dig", "path": "M 0 0 V -120 H -120" },
     "slant": { "name": "Slant", "path": "M 0 0 L -60 -60" },
-    "hitch_6yd": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l -10 10" },
     "screen_rcv": { "name": "Screen Receiver", "path": "M 0 0 v -12 l -40 -10" },
     "screen_block": { "name": "Screen Blocker", "path": "M 0 0 v -24 l -60 20" },
     "stupid_out_5yd": { "name": "5yd Out", "path": "M 0 0 v -60 H 100" },
@@ -44,7 +45,6 @@ const defaultPlaybook = {
       "Lt": { "positions": { "X": { "x": 100, "y": 380 }, "Y": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "F": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 420, "y": 480 } }, "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "Y" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "F" } } } },
       "Rt": { "positions": { "X": { "x": 100, "y": 380 }, "F": { "x": 180, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 520, "y": 380 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } }, "sides": { "left": { "count": 2, "players": { "outer": "X", "inner": "F" } }, "right": { "count": 2, "players": { "outer": "Z", "inner": "Y" } } } }
     },
-    // ADDED: Bunch Formation
     "Bunch": {
       "Lt": { "positions": { "X": { "x": 80, "y": 380 }, "Y": { "x": 150, "y": 380 }, "F": { "x": 115, "y": 400 }, "C": { "x": 350, "y": 390 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 420, "y": 480 } }, "sides": { "left": { "count": 3, "players": { "outer": "X", "middle": "Y", "inner": "F" } }, "right": { "count": 1, "players": { "outer": "Z" } } } },
       "Rt": { "positions": { "X": { "x": 100, "y": 380 }, "C": { "x": 350, "y": 390 }, "Y": { "x": 530, "y": 380 }, "F": { "x": 565, "y": 400 }, "Z": { "x": 600, "y": 380 }, "Q": { "x": 350, "y": 480 }, "H": { "x": 280, "y": 480 } }, "sides": { "left": { "count": 1, "players": { "outer": "X" } }, "right": { "count": 3, "players": { "outer": "Z", "middle": "Y", "inner": "F" } } } }
@@ -64,7 +64,6 @@ const defaultPlaybook = {
       "threeMan": { 
           "Houston": { "assignments": { "outer": "hitch_6yd", "middle": "hitch_6yd", "inner": "hitch_6yd" } }, 
           "Fresno": { "usesCenter": true, "assignments": { "outer": "fresno_go", "middle": "fresno_sit", "inner": "fresno_drag" } },
-          // UPDATED: Spacing is now tied to the Bunch formation
           "Spacing": { "formation": "Bunch", "assignments": { "outer": "hitch_6yd", "middle": "flat", "inner": "slant" } } 
       },
       "fullField": {
@@ -79,3 +78,4 @@ const defaultPlaybook = {
     "Tight": { "type": "formationCompression", "spacing": 50 }
   }
 };
+
