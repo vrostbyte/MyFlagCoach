@@ -13,6 +13,9 @@ const PLAYER_COLORS = {
     DEFAULT: '#374151' // gray-700
 };
 
+// All possible players to ensure everyone gets an arrowhead
+const ALL_PLAYERS = ['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'];
+
 const App = () => {
     // --- STATE MANAGEMENT ---
     const [currentPlaybook, setCurrentPlaybook] = useState(playbook);
@@ -33,8 +36,8 @@ const App = () => {
         if (!activeFormation) return { routes: {}, positions: {} };
 
         let routes = {};
-        let basePositions = { ...activeFormation.positions };
-        
+        const basePositions = { ...activeFormation.positions };
+
         // Default blocking assignments
         if (basePositions.H) routes.H = "block";
         if (basePositions.C) routes.C = "block";
@@ -43,7 +46,7 @@ const App = () => {
             if (!concept) return;
             const sideInfo = activeFormation.sides[side];
             const players = [...sideInfo.players];
-            let conceptDefinition = playbook.concepts[`${players.length}Man`]?.[concept];
+            const conceptDefinition = playbook.concepts[`${players.length}Man`]?.[concept];
             const routeSuffix = side === 'left' ? '_L' : '_R';
 
             if (conceptDefinition) {
@@ -68,31 +71,52 @@ const App = () => {
             applyConcept(rightConcept, 'right');
         }
 
-        let finalPositions = { ...basePositions };
+        // Positional Modifiers must be calculated last
+        let finalPositions = JSON.parse(JSON.stringify(basePositions)); // Deep copy to prevent bugs
+
         activeModifiers.forEach(modName => {
             const modifier = currentPlaybook.modifiers[modName];
             if (modifier.type === 'positional' && finalPositions[modifier.player]) {
                 routes[modifier.player] = modifier.assignment;
                 if (modifier.position === 'mirrorH' && finalPositions.H && finalPositions.Q) {
-                    const hPos = finalPositions.H;
-                    const qPos = finalPositions.Q;
-                    finalPositions[modifier.player] = { x: -hPos.x, y: hPos.y };
+                    finalPositions[modifier.player] = { x: -finalPositions.H.x, y: finalPositions.H.y };
                 }
             }
             if (modifier.type === 'formationCompression') {
-                const linemen = ['X', 'F', 'Y', 'C', 'Z', 'H'].filter(p => finalPositions[p] && finalPositions[p].y <= 0);
-                const centerPos = finalPositions.C.x;
-                const sortedLinemen = linemen.sort((a, b) => finalPositions[a].x - finalPositions[b].x);
+                const linemen = ALL_PLAYERS.filter(p => finalPositions[p] && finalPositions[p].y <= 0);
+                const sortedLinemen = linemen.sort((a, b) => basePositions[a].x - basePositions[b].x);
                 const centerIndex = sortedLinemen.findIndex(p => p === 'C');
                 
                 sortedLinemen.forEach((player, i) => {
-                    finalPositions[player].x = centerPos + (i - centerIndex) * modifier.spacing;
+                    finalPositions[player].x = finalPositions.C.x + (i - centerIndex) * modifier.spacing;
                 });
             }
         });
 
         return { routes, positions: finalPositions };
     }, [activeFormation, leftConcept, rightConcept, fullFieldPlay, activeModifiers, currentPlaybook]);
+
+    const computedPlayName = useMemo(() => {
+        const parts = [];
+        if (selectedFormation) parts.push(selectedFormation);
+        if (selectedStrength) parts.push(selectedStrength);
+        if (activeModifiers.length > 0) parts.push(...activeModifiers);
+
+        if (fullFieldPlay) {
+            parts.push(currentPlaybook.concepts.fullField[fullFieldPlay].name);
+        } else {
+            if (leftConcept) parts.push(leftConcept);
+            if (rightConcept) {
+                 if(leftConcept !== rightConcept) {
+                     parts.push(rightConcept);
+                 } else if (!leftConcept) {
+                     parts.push(rightConcept)
+                 }
+            }
+        }
+        
+        return parts.join(' - ');
+    }, [selectedFormation, selectedStrength, activeModifiers, leftConcept, rightConcept, fullFieldPlay]);
 
     // --- EVENT HANDLERS ---
     const resetPlay = () => {
@@ -126,13 +150,10 @@ const App = () => {
             switch (step.type) {
                 case 'stem': currentY -= step.yards * YARD_SCALE; path += ` L ${currentX} ${currentY}`; break;
                 case 'break':
-                    // Angle system: 0 is vertical, positive is right, negative is left
                     radians = step.angle * (Math.PI / 180);
                     dX = Math.sin(radians) * step.yards * YARD_SCALE;
-                    dY = -Math.cos(radians) * step.yards * YARD_SCALE; // Y is negative to go "up"
-                    currentX += dX;
-                    currentY += dY;
-                    path += ` L ${currentX} ${currentY}`;
+                    dY = -Math.cos(radians) * step.yards * YARD_SCALE;
+                    currentX += dX; currentY += dY; path += ` L ${currentX} ${currentY}`;
                     break;
                 case 'release':
                     radians = step.angle * (Math.PI / 180);
@@ -186,24 +207,15 @@ const App = () => {
                 <div className="bg-white rounded-lg shadow p-4"><h2 className="text-xl font-bold mb-3 border-b pb-2 text-gray-900">Modifiers</h2><div className="grid grid-cols-2 gap-2">{Object.keys(currentPlaybook.modifiers).map(name => (<button key={name} onClick={() => toggleModifier(name)} className={`p-4 rounded-lg shadow transition-all font-semibold ${activeModifiers.includes(name) ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-white hover:bg-gray-800'}`}>{name}</button>))}</div></div>
             </div>
             <div className="w-3/4 flex flex-col p-6">
+                <div className="h-16 flex-shrink-0 bg-white rounded-lg shadow mb-6 flex items-center justify-center p-4">
+                    <span className="text-2xl font-bold text-gray-800 truncate">{computedPlayName || 'Build Your Play'}</span>
+                </div>
                 <div className="flex-grow bg-gray-100 rounded-lg shadow-inner relative overflow-hidden">
                     <svg width="100%" height="100%" viewBox="-350 -300 700 350">
                         <rect x="-350" y="-300" width="700" height="350" fill="white" />
                         <g className="yard-markers">
-                            {/* Line of Scrimmage */}
                             <line x1="-350" y1="0" x2="350" y2="0" stroke="#172554" strokeWidth="3" />
-                            
-                            {/* 5-Yard Markers */}
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <line 
-                                    key={i} 
-                                    x1="-350" y1={-(i + 1) * 60} 
-                                    x2="350" y2={-(i + 1) * 60} 
-                                    stroke="#e5e7eb" 
-                                    strokeWidth="1" 
-                                    strokeDasharray="4 8" 
-                                />
-                            ))}
+                            {Array.from({ length: 5 }).map((_, i) => (<line key={i} x1="-350" y1={-(i + 1) * 60} x2="350" y2={-(i + 1) * 60} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 8" />))}
                         </g>
                         <g className="routes">
                             {Object.entries(playerAssignments.routes).map(([player, routeKey]) => {
@@ -221,21 +233,25 @@ const App = () => {
                             })}
                         </g>
                         <defs>
-                            {Object.keys(PLAYER_COLORS).map(player => (
-                                <marker key={player} id={`arrow-${player}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
-                                    <path d="M 0 0 L 10 5 L 0 10 z" fill={PLAYER_COLORS[player] || PLAYER_COLORS.DEFAULT} />
-                                </marker>
-                            ))}
+                            {ALL_PLAYERS.map(player => {
+                                const color = PLAYER_COLORS[player] || PLAYER_COLORS.DEFAULT;
+                                return (
+                                    <marker key={player} id={`arrow-${player}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
+                                    </marker>
+                                );
+                            })}
                         </defs>
                     </svg>
                 </div>
                 <div className="h-48 bg-white mt-6 rounded-lg shadow p-4 overflow-y-auto text-gray-900">
                     <h3 className="text-2xl font-bold mb-2">Player Responsibilities</h3>
                     <div className="grid grid-cols-4 gap-4">
-                        {['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'].map(player => {
+                        {ALL_PLAYERS.map(player => {
                              const routeKey = playerAssignments.routes[player];
                              const routeName = (currentPlaybook.routeLibrary[routeKey]?.name || routeKey || 'Block');
-                            return (<div key={player} className="flex items-baseline"><span className="font-bold text-lg w-8">{player}:</span><span className="text-gray-700 capitalize">{routeName}</span></div>);
+                             const color = PLAYER_COLORS[player] || PLAYER_COLORS.DEFAULT;
+                            return (<div key={player} className="flex items-baseline"><span className="font-bold text-lg w-8" style={{ color }}>{player}:</span><span className="text-gray-700 capitalize">{routeName}</span></div>);
                         })}
                     </div>
                 </div>
