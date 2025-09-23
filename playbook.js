@@ -10,14 +10,15 @@ const defaultPlaybook = {
     "dallas_slant_L": { "name": "Dallas Slant", "path": "M 0 0 v -36 L 80 -180" },
     "dallas_slant_R": { "name": "Dallas Slant", "path": "M 0 0 v -36 L -80 -180" },
     "now_seam": { "name": "Now Seam", "path": "M 0 0 V -180" },
+    
+    // CORRECTED: More accurate Fresno Sit route with a 90-degree cut
     "fresno_go_L": { "name": "Fresno Go", "path": "M 0 0 l -20 -36 v -180" },
-    "fresno_sit_L": { "name": "Fresno Sit", "path": "M 0 0 l 60 -96 l -30 20" },
+    "fresno_sit_L": { "name": "Fresno Sit", "path": "M 0 0 l 60 -96 h -60" },
     "fresno_drag_L": { "name": "Fresno Drag", "path": "M 0 0 v -24 H -250" },
     "fresno_go_R": { "name": "Fresno Go", "path": "M 0 0 l 20 -36 v -180" },
-    "fresno_sit_R": { "name": "Fresno Sit", "path": "M 0 0 l -60 -96 l 30 20" },
+    "fresno_sit_R": { "name": "Fresno Sit", "path": "M 0 0 l -60 -96 h 60" },
     "fresno_drag_R": { "name": "Fresno Drag", "path": "M 0 0 v -24 H 250" },
-    
-    // CORRECTED: Mirrored hitch routes
+
     "hitch_6yd_L": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l 10 10" },
     "hitch_6yd_R": { "name": "6yd Hitch (Houston)", "path": "M 0 0 v -72 l -10 10" },
 
