@@ -124,24 +124,27 @@ const App = () => {
         route.steps.forEach(step => {
             let dX, dY, radians;
             switch (step.type) {
-                case 'stem': currentY += step.yards * YARD_SCALE; path += ` L ${currentX} ${currentY}`; break;
+                case 'stem': currentY -= step.yards * YARD_SCALE; path += ` L ${currentX} ${currentY}`; break;
                 case 'break':
-                    radians = (step.angle + 90) * (Math.PI / 180); // Adjusted for vertical field
-                    currentX += Math.cos(radians) * step.yards * YARD_SCALE;
-                    currentY += Math.sin(radians) * step.yards * YARD_SCALE;
+                    // Angle system: 0 is vertical, positive is right, negative is left
+                    radians = step.angle * (Math.PI / 180);
+                    dX = Math.sin(radians) * step.yards * YARD_SCALE;
+                    dY = -Math.cos(radians) * step.yards * YARD_SCALE; // Y is negative to go "up"
+                    currentX += dX;
+                    currentY += dY;
                     path += ` L ${currentX} ${currentY}`;
                     break;
                 case 'release':
-                    radians = (step.angle + 90) * (Math.PI / 180);
-                    dX = Math.cos(radians) * step.yards * YARD_SCALE;
-                    dY = Math.sin(radians) * step.yards * YARD_SCALE;
+                    radians = step.angle * (Math.PI / 180);
+                    dX = Math.sin(radians) * step.yards * YARD_SCALE;
+                    dY = -Math.cos(radians) * step.yards * YARD_SCALE;
                     currentX += dX; currentY += dY; path += ` l ${dX} ${dY}`;
                     break;
                 case 'drag': currentX += (step.direction === 'left' ? -1 : 1) * step.yards * YARD_SCALE; path += ` L ${currentX} ${currentY}`; break;
                 case 'swing':
-                    const c1x = startPos.x + (step.direction === 'left' ? -50 : 50), c1y = startPos.y - 30;
-                    const c2x = startPos.x + (step.direction === 'left' ? -150 : 150), c2y = startPos.y - 30;
-                    currentX = startPos.x + (step.direction === 'left' ? -200 : 200); currentY = startPos.y - 10;
+                    const c1x = startPos.x + (step.direction === 'left' ? -50 : 50), c1y = startPos.y + 30;
+                    const c2x = startPos.x + (step.direction === 'left' ? -150 : 150), c2y = startPos.y + 30;
+                    currentX = startPos.x + (step.direction === 'left' ? -200 : 200); currentY = startPos.y + 10;
                     path += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${currentX} ${currentY}`;
                     break;
             }
@@ -183,12 +186,24 @@ const App = () => {
                 <div className="bg-white rounded-lg shadow p-4"><h2 className="text-xl font-bold mb-3 border-b pb-2 text-gray-900">Modifiers</h2><div className="grid grid-cols-2 gap-2">{Object.keys(currentPlaybook.modifiers).map(name => (<button key={name} onClick={() => toggleModifier(name)} className={`p-4 rounded-lg shadow transition-all font-semibold ${activeModifiers.includes(name) ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-white hover:bg-gray-800'}`}>{name}</button>))}</div></div>
             </div>
             <div className="w-3/4 flex flex-col p-6">
-                <div className="flex-grow bg-white rounded-lg shadow-inner relative overflow-hidden">
-                    <svg width="100%" height="100%" viewBox="-350 0 700 300">
-                        <rect x="-350" y="0" width="700" height="300" fill="#4ade80" />
-                        <g className="yard-markers" opacity="0.4">
-                            <line x1="-350" y1="0" x2="350" y2="0" stroke="white" strokeWidth="2" />
-                            {Array.from({ length: 13 }).map((_, i) => (<line key={i} x1={-300 + i * 50} y1="0" x2={-300 + i * 50} y2="300" stroke="white" strokeWidth="1" strokeDasharray="2 8" />))}
+                <div className="flex-grow bg-gray-100 rounded-lg shadow-inner relative overflow-hidden">
+                    <svg width="100%" height="100%" viewBox="-350 -300 700 350">
+                        <rect x="-350" y="-300" width="700" height="350" fill="white" />
+                        <g className="yard-markers">
+                            {/* Line of Scrimmage */}
+                            <line x1="-350" y1="0" x2="350" y2="0" stroke="#172554" strokeWidth="3" />
+                            
+                            {/* 5-Yard Markers */}
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <line 
+                                    key={i} 
+                                    x1="-350" y1={-(i + 1) * 60} 
+                                    x2="350" y2={-(i + 1) * 60} 
+                                    stroke="#e5e7eb" 
+                                    strokeWidth="1" 
+                                    strokeDasharray="4 8" 
+                                />
+                            ))}
                         </g>
                         <g className="routes">
                             {Object.entries(playerAssignments.routes).map(([player, routeKey]) => {
