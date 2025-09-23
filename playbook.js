@@ -79,4 +79,3 @@ const defaultPlaybook = {
     "Tight": { "type": "formationCompression", "spacing": 50 }
   }
 };
-
