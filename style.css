@@ -1,224 +1,29 @@
-/* --- Base Styles & Variables --- */
-:root {
-    --bg-color: #f0f2f5;
-    --panel-bg-color: #ffffff;
-    --field-bg-color: #ffffff; /* UPDATED: Cleaner white background */
-    --line-color: rgba(0, 0, 0, 0.15); /* UPDATED: Darker lines for contrast */
-    --text-color: #1c1c1e;
-    --text-color-light: #6a6a6e;
-    --border-color: #d1d1d6;
-    --primary-color: #007aff;
-    --active-color: #34c759;
-    --file-btn-color: #6c757d;
+/* style.css */
+
+/* Ensures the app takes up the full screen, especially on mobile devices */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    margin: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    -webkit-tap-highlight-color: transparent;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+/* Custom scrollbar styling for a cleaner look in the control panel */
+.control-panel::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* --- Main Layout --- */
-#app {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+.control-panel::-webkit-scrollbar-track {
+  background: #2d3748; /* bg-gray-800 */
 }
 
-.main-header {
-    background-color: var(--panel-bg-color);
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border-color);
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+.control-panel::-webkit-scrollbar-thumb {
+  background: #4a5568; /* bg-gray-700 */
+  border-radius: 4px;
 }
 
-#current-play-display {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--primary-color);
-    min-height: 25px;
-}
-
-.main-content {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.field-and-table-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 20px;
-    gap: 20px;
-    overflow-y: auto;
-}
-
-.field-container {
-    flex: 1;
-    min-height: 400px;
-    background-color: var(--field-bg-color);
-    border: 1px solid var(--border-color); /* ADDED: Border for definition */
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#play-canvas {
-    width: 100%;
-    height: 100%;
-}
-
-.controls-container {
-    width: 400px;
-    background-color: var(--panel-bg-color);
-    border-left: 1px solid var(--border-color);
-    overflow-y: auto;
-}
-
-.control-panel {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* --- Control Groups & Buttons --- */
-.control-group {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
-}
-
-#file-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-}
-
-.file-btn {
-    padding: 12px;
-    font-size: 0.9em;
-    font-weight: 500;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--file-btn-color);
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.file-btn:hover {
-    background-color: #5a6268;
-}
-
-.play-call-flow {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.step-title {
-    margin: 0 0 10px 0;
-    text-align: center;
-    font-size: 1em;
-    font-weight: 600;
-    color: var(--text-color-light);
-}
-
-.button-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.button-grid.vertical {
-    grid-template-columns: 1fr;
-}
-
-.control-btn {
-    padding: 15px 10px;
-    font-size: 1em;
-    border: 2px solid var(--primary-color);
-    border-radius: 8px;
-    background-color: white;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.15s ease;
-}
-
-.control-btn:active {
-    transform: scale(0.95);
-}
-
-.control-btn.active {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.concept-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.placeholder-text {
-    text-align: center;
-    color: var(--text-color-light);
-    font-style: italic;
-    padding: 10px 0;
-}
-
-/* --- Assignments Table Styles --- */
-#assignments-container {
-    background-color: var(--panel-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
-
-.assignments-title {
-    margin: 0 0 10px 0;
-    text-align: center;
-    font-size: 1.1em;
-    color: var(--text-color-light);
-}
-
-#assignments-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#assignments-table th,
-#assignments-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#assignments-table th {
-    font-weight: 600;
-    background-color: #f8f9fa;
-}
-
-#assignments-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-#assignments-table td:first-child {
-    font-weight: 700;
-    width: 30%;
-    text-align: center;
-    color: var(--primary-color);
+.control-panel::-webkit-scrollbar-thumb:hover {
+  background: #718096; /* bg-gray-600 */
 }
 

@@ -1,22 +1,24 @@
 /**
  * MyFlagCoach Playbook - Project Phoenix
- * This file is now a simple script that defines a global 'playbook' variable.
- * The 'export' keyword has been removed to simplify loading in the browser.
+ * This file defines the global 'playbook' variable.
+ * It contains all formations, routes, concepts, and modifiers for the app.
+ * The coordinate system is now vertical: X is horizontal, Y is vertical depth.
+ * Line of Scrimmage is at Y = 0.
  */
 
 const playbook = {
-    // Master library of all possible routes. Routes are defined by steps.
+    // Master library of all possible routes, defined by their steps.
     routeLibrary: {
-        // Universal Routes
+        // Universal Routes (not side-specific)
         go: { name: "Go", steps: [{ type: 'stem', yards: 22 }] },
         now_seam: { name: "Now Seam", steps: [{ type: 'stem', yards: 18 }] },
         block: { name: "Block", steps: [] },
         swingR: { name: "Swing Right", steps: [{ type: 'swing', direction: 'right' }] },
         swingL: { name: "Swing Left", steps: [{ type: 'swing', direction: 'left' }] },
         
-        // Mirrored Routes (Side-Specific)
-        hitch_6yd_L: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 135, yards: 1 }] },
-        hitch_6yd_R: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -135, yards: 1 }] },
+        // Mirrored Routes (Side-Specific Logic)
+        hitch_6yd_L: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 135, yards: 2 }] },
+        hitch_6yd_R: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -135, yards: 2 }] },
         
         dallas_slant_L: { name: "Dallas Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: 45, yards: 15 }] },
         dallas_slant_R: { name: "Dallas Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: -45, yards: 15 }] },
@@ -28,33 +30,37 @@ const playbook = {
 
         fresno_go_L: { name: "Fresno Go", steps: [{ type: 'release', angle: -20, yards: 3 }, { type: 'stem', yards: 18 }] },
         fresno_sit_L: { name: "Fresno Sit", steps: [{ type: 'break', angle: 45, yards: 8 }, { type: 'break', angle: 180, yards: 3 }] },
-        fresno_drag_L: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 25 }] },
+        fresno_drag_L: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 30 }] },
         fresno_go_R: { name: "Fresno Go", steps: [{ type: 'release', angle: 20, yards: 3 }, { type: 'stem', yards: 18 }] },
         fresno_sit_R: { name: "Fresno Sit", steps: [{ type: 'break', angle: -45, yards: 8 }, { type: 'break', angle: 0, yards: 3 }] },
-        fresno_drag_R: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 25 }] },
+        fresno_drag_R: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 30 }] },
         
-        screen_rcv: { name: "Screen Receiver", steps: [{ type: 'stem', yards: -1 }, { type: 'break', angle: -135, yards: 4 }] },
-        screen_block: { name: "Screen Blocker", steps: [{ type: 'stem', yards: 2 }, { type: 'break', angle: -110, yards: 6 }] },
+        screen_rcv_L: { name: "Screen Receiver", steps: [{ type: 'stem', yards: -1 }, { type: 'break', angle: 135, yards: 4 }] },
+        screen_block_L: { name: "Screen Blocker", steps: [{ type: 'stem', yards: 2 }, { type: 'break', angle: 110, yards: 6 }] },
+        screen_rcv_R: { name: "Screen Receiver", steps: [{ type: 'stem', yards: -1 }, { type: 'break', angle: -135, yards: 4 }] },
+        screen_block_R: { name: "Screen Blocker", steps: [{ type: 'stem', yards: 2 }, { type: 'break', angle: -110, yards: 6 }] },
 
-        stupid_out_5yd: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: -90, yards: 10 }] },
-        stupid_corner_6yd: { name: "6yd Corner", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -45, yards: 12 }] },
+        stupid_out_5yd_L: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: -90, yards: 10 }] },
+        stupid_corner_6yd_L: { name: "6yd Corner", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -45, yards: 12 }] },
+        stupid_out_5yd_R: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: 90, yards: 10 }] },
+        stupid_corner_6yd_R: { name: "6yd Corner", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 45, yards: 12 }] },
     },
     formations: {
         "Trips": {
-            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: -10 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: 70, y: -50 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 1, "players": ["Z"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: -10 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: -70, y: -50 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
+            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 1, "players": ["Z"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
         },
         "Divide": {
-            "Lt": { "positions": { "X": { x: -250, y: 0 }, "Y": { x: -170, y: 0 }, "C": { x: 0, y: -10 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: 70, y: -50 } }, "sides": { "left": { "count": 2, "players": ["X", "Y"] }, "right": { "count": 2, "players": ["Z", "F"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "C": { x: 0, y: -10 }, "Y": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: -70, y: -50 } }, "sides": { "left": { "count": 2, "players": ["X", "F"] }, "right": { "count": 2, "players": ["Z", "Y"] } } }
+            "Lt": { "positions": { "X": { x: -250, y: 0 }, "Y": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "Y"] }, "right": { "count": 2, "players": ["Z", "F"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "F"] }, "right": { "count": 2, "players": ["Z", "Y"] } } }
         },
         "Bunch": {
-            "Lt": { "positions": { "X": { x: -230, y: 0 }, "Y": { x: -160, y: 0 }, "F": { x: -195, y: 20 }, "C": { x: 0, y: -10 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: 70, y: -50 } }, "sides": { "left": { "count": 3, "players": ["X", "Y", "F"] }, "right": { "count": 1, "players": ["Z"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: -10 }, "Y": { x: 160, y: 0 }, "F": { x: 195, y: 20 }, "Z": { x: 230, y: 0 }, "Q": { x: 0, y: -50 }, "H": { x: -70, y: -50 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "Y", "F"] } } }
+            "Lt": { "positions": { "X": { x: -230, y: 0 }, "Y": { x: -160, y: 0 }, "F": { x: -195, y: -20 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "Y", "F"] }, "right": { "count": 1, "players": ["Z"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 160, y: 0 }, "F": { x: 195, y: -20 }, "Z": { x: 230, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "Y", "F"] } } }
         },
         "Empty": {
-            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: -10 }, "H": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 2, "players": ["Z", "H"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "H": { x: -170, y: 0 }, "C": { x: 0, y: -10 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: -50 } }, "sides": { "left": { "count": 2, "players": ["X", "H"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
+            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: 0 }, "H": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 2, "players": ["Z", "H"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "H": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "H"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
         }
     },
     concepts: {
@@ -73,10 +79,10 @@ const playbook = {
             "Spacing": { formation: "Bunch", assignments: { "0": "hitch_6yd", "1": "flat", "2": "slant" } }
         },
         "fullField": {
-            "Yale": { name: "Yale Screen", formation: "Empty Lt", assignments: { "X": "screen_rcv", "F": "screen_block", "Y": "screen_block", "Z": "go", "H": "go" } },
-            "Harvard": { name: "Harvard Screen", formation: "Empty Rt", assignments: { "Z": "screen_rcv", "F": "screen_block", "Y": "screen_block", "X": "go", "H": "go" } },
-            "Stupid Lt": { name: "Stupid", formation: "Divide Lt", assignments: { "X": "stupid_out_5yd", "Y": "stupid_corner_6yd", "Z": "stupid_out_5yd", "F": "stupid_corner_6yd" } },
-            "Stupid Rt": { name: "Stupid", formation: "Divide Rt", assignments: { "X": "stupid_out_5yd", "F": "stupid_corner_6yd", "Z": "stupid_out_5yd", "Y": "stupid_corner_6yd" } }
+            "Yale": { name: "Yale Screen", formation: "Empty Lt", assignments: { "X": "screen_rcv_L", "F": "screen_block_L", "Y": "screen_block_L", "Z": "go", "H": "go", "C": "block", "Q": "block" } },
+            "Harvard": { name: "Harvard Screen", formation: "Empty Rt", assignments: { "Z": "screen_rcv_R", "F": "screen_block_R", "Y": "screen_block_R", "X": "go", "H": "go", "C": "block", "Q": "block" } },
+            "Stupid Lt": { name: "Stupid", formation: "Divide Lt", assignments: { "X": "stupid_out_5yd_L", "Y": "stupid_corner_6yd_L", "Z": "stupid_out_5yd_R", "F": "stupid_corner_6yd_R", "C": "block", "H": "block", "Q": "block" } },
+            "Stupid Rt": { name: "Stupid", formation: "Divide Rt", assignments: { "X": "stupid_out_5yd_L", "F": "stupid_corner_6yd_L", "Z": "stupid_out_5yd_R", "Y": "stupid_corner_6yd_R", "C": "block", "H": "block", "Q": "block" } }
         }
     },
     modifiers: {
