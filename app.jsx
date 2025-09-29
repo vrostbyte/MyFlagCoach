@@ -49,7 +49,6 @@ const App = ({ initialPlaybook }) => {
             const sideInfo = activeFormation.sides[side];
             const players = [...sideInfo.players];
             
-            // FIX: Ensure all logic uses `currentPlaybook` from state, not the global `playbook`
             let conceptDefinition = currentPlaybook.concepts[`${players.length}Man`]?.[concept];
             if (!conceptDefinition && players.length === 2) {
                 const threeManConcept = currentPlaybook.concepts['3Man']?.[concept];
@@ -140,7 +139,29 @@ const App = ({ initialPlaybook }) => {
 
     const handleFormationSelect = name => (resetPlay(), setSelectedFormation(name));
     const handleStrengthSelect = str => (setLeftConcept(null), setRightConcept(null), setFullFieldPlay(null), setSelectedStrength(str));
-    const handleConceptSelect = (con, side) => (setFullFieldPlay(null), side === 'left' ? setLeftConcept(p => p === con ? null : con) : setRightConcept(p => p === con ? null : con));
+    
+    // Updated handler with anti-collision logic for Fresno
+    const handleConceptSelect = (conceptName, side) => {
+        setFullFieldPlay(null); // always reset full field plays
+        const isDeselecting = (side === 'left' && leftConcept === conceptName) || (side === 'right' && rightConcept === conceptName);
+
+        if (side === 'left') {
+            const newLeftConcept = isDeselecting ? null : conceptName;
+            setLeftConcept(newLeftConcept);
+            // If Fresno is selected on the left, ensure it's not on the right.
+            if (newLeftConcept === 'Fresno' && rightConcept === 'Fresno') {
+                setRightConcept(null);
+            }
+        } else { // side === 'right'
+            const newRightConcept = isDeselecting ? null : conceptName;
+            setRightConcept(newRightConcept);
+            // If Fresno is selected on the right, ensure it's not on the left.
+            if (newRightConcept === 'Fresno' && leftConcept === 'Fresno') {
+                setLeftConcept(null);
+            }
+        }
+    };
+
     const handleFullFieldSelect = name => (setLeftConcept(null), setRightConcept(null), setFullFieldPlay(p => p === name ? null : name));
     const toggleModifier = name => setActiveModifiers(p => p.includes(name) ? p.filter(m => m !== name) : [...p, name]);
 
