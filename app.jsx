@@ -16,10 +16,10 @@ const PLAYER_COLORS = {
 // All possible players to ensure everyone gets an arrowhead
 const ALL_PLAYERS = ['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'];
 
-// Change: App now accepts props, specifically 'initialPlaybook'
+// App now accepts props, specifically 'initialPlaybook'
 const App = ({ initialPlaybook }) => {
     // --- STATE MANAGEMENT ---
-    // Change: State is initialized from the 'initialPlaybook' prop instead of a global variable.
+    // State is initialized from the 'initialPlaybook' prop instead of a global variable.
     const [currentPlaybook, setCurrentPlaybook] = useState(initialPlaybook);
     const [selectedFormation, setSelectedFormation] = useState(null);
     const [selectedStrength, setSelectedStrength] = useState(null);
@@ -49,7 +49,7 @@ const App = ({ initialPlaybook }) => {
             const sideInfo = activeFormation.sides[side];
             const players = [...sideInfo.players];
             
-            // Note: The logic here depends on 'currentPlaybook', not the global 'playbook'
+            // FIX: Ensure all logic uses `currentPlaybook` from state, not the global `playbook`
             let conceptDefinition = currentPlaybook.concepts[`${players.length}Man`]?.[concept];
             if (!conceptDefinition && players.length === 2) {
                 const threeManConcept = currentPlaybook.concepts['3Man']?.[concept];
@@ -189,10 +189,8 @@ const App = ({ initialPlaybook }) => {
         const numPlayers = sideInfo.players.length;
         const conceptCategory = `${numPlayers}Man`;
         
-        // Start with the base concepts for the number of players on the side
         let availableConcepts = { ...(currentPlaybook.concepts[conceptCategory] || {}) };
 
-        // If it's a 2-man side, also check for 3-man concepts that use the center
         if (numPlayers === 2) {
             const threeManConcepts = currentPlaybook.concepts["3Man"] || {};
             Object.entries(threeManConcepts).forEach(([name, conceptDef]) => {
@@ -285,7 +283,7 @@ const App = ({ initialPlaybook }) => {
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-// Change: Pass the global playbook object as a prop to the App component.
+// Pass the global playbook object as a prop to the App component.
 // This ensures the data is available before the app tries to render.
 root.render(<App initialPlaybook={playbook} />);
 
