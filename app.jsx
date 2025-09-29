@@ -16,9 +16,11 @@ const PLAYER_COLORS = {
 // All possible players to ensure everyone gets an arrowhead
 const ALL_PLAYERS = ['Q', 'C', 'H', 'X', 'Y', 'Z', 'F'];
 
-const App = () => {
+// Change: App now accepts props, specifically 'initialPlaybook'
+const App = ({ initialPlaybook }) => {
     // --- STATE MANAGEMENT ---
-    const [currentPlaybook, setCurrentPlaybook] = useState(playbook);
+    // Change: State is initialized from the 'initialPlaybook' prop instead of a global variable.
+    const [currentPlaybook, setCurrentPlaybook] = useState(initialPlaybook);
     const [selectedFormation, setSelectedFormation] = useState(null);
     const [selectedStrength, setSelectedStrength] = useState(null);
     const [leftConcept, setLeftConcept] = useState(null);
@@ -46,18 +48,27 @@ const App = () => {
             if (!concept) return;
             const sideInfo = activeFormation.sides[side];
             const players = [...sideInfo.players];
-            const conceptDefinition = playbook.concepts[`${players.length}Man`]?.[concept];
+            
+            // Note: The logic here depends on 'currentPlaybook', not the global 'playbook'
+            let conceptDefinition = currentPlaybook.concepts[`${players.length}Man`]?.[concept];
+            if (!conceptDefinition && players.length === 2) {
+                const threeManConcept = currentPlaybook.concepts['3Man']?.[concept];
+                if (threeManConcept?.usesCenter) {
+                    conceptDefinition = threeManConcept;
+                }
+            }
+            
             const routeSuffix = side === 'left' ? '_L' : '_R';
 
             if (conceptDefinition) {
                 if (conceptDefinition.usesCenter && players.length < 3 && basePositions.C) {
-                    players.push('C');
+                    players.push('C'); 
                 }
                 
                 Object.entries(conceptDefinition.assignments).forEach(([index, routeKey]) => {
                     const player = players[index];
                     if (player) {
-                        routes[player] = playbook.routeLibrary[routeKey + routeSuffix] ? routeKey + routeSuffix : routeKey;
+                        routes[player] = currentPlaybook.routeLibrary[routeKey + routeSuffix] ? routeKey + routeSuffix : routeKey;
                     }
                 });
             }
@@ -71,8 +82,7 @@ const App = () => {
             applyConcept(rightConcept, 'right');
         }
 
-        // Positional Modifiers must be calculated last
-        let finalPositions = JSON.parse(JSON.stringify(basePositions)); // Deep copy to prevent bugs
+        let finalPositions = JSON.parse(JSON.stringify(basePositions));
 
         activeModifiers.forEach(modName => {
             const modifier = currentPlaybook.modifiers[modName];
@@ -116,7 +126,7 @@ const App = () => {
         }
         
         return parts.join(' - ');
-    }, [selectedFormation, selectedStrength, activeModifiers, leftConcept, rightConcept, fullFieldPlay]);
+    }, [selectedFormation, selectedStrength, activeModifiers, leftConcept, rightConcept, fullFieldPlay, currentPlaybook]);
 
     // --- EVENT HANDLERS ---
     const resetPlay = () => {
@@ -178,16 +188,30 @@ const App = () => {
         const sideInfo = activeFormation.sides[side];
         const numPlayers = sideInfo.players.length;
         const conceptCategory = `${numPlayers}Man`;
-        const concepts = currentPlaybook.concepts[conceptCategory];
-        if (!concepts) return null;
+        
+        // Start with the base concepts for the number of players on the side
+        let availableConcepts = { ...(currentPlaybook.concepts[conceptCategory] || {}) };
+
+        // If it's a 2-man side, also check for 3-man concepts that use the center
+        if (numPlayers === 2) {
+            const threeManConcepts = currentPlaybook.concepts["3Man"] || {};
+            Object.entries(threeManConcepts).forEach(([name, conceptDef]) => {
+                if (conceptDef.usesCenter) {
+                    availableConcepts[name] = conceptDef;
+                }
+            });
+        }
+
+        if (Object.keys(availableConcepts).length === 0) return null;
+        
         const selectedConcept = side === 'left' ? leftConcept : rightConcept;
 
         return (
             <div className="bg-white rounded-lg shadow p-4 text-gray-900">
                 <h2 className="text-xl font-bold mb-3 border-b pb-2 capitalize">{side} Side Concepts</h2>
                 <div className="grid grid-cols-2 gap-2">
-                    {Object.keys(concepts).map(name => {
-                        const def = concepts[name];
+                    {Object.keys(availableConcepts).sort().map(name => {
+                        const def = availableConcepts[name];
                         if (def.formation && def.formation !== selectedFormation) return null;
                         return (<button key={name} onClick={() => handleConceptSelect(name, side)} className={`p-4 rounded-lg shadow transition-all text-sm font-semibold ${selectedConcept === name ? 'bg-green-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-800'}`}>{name}</button>);
                     })}
@@ -261,5 +285,7 @@ const App = () => {
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+// Change: Pass the global playbook object as a prop to the App component.
+// This ensures the data is available before the app tries to render.
+root.render(<App initialPlaybook={playbook} />);
 
