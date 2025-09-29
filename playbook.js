@@ -25,10 +25,10 @@ const playbook = {
 
         // Fresno Routes
         fresno_go_L: { name: "Fresno Go", steps: [{ type: 'release', angle: -20, yards: 3 }, { type: 'stem', yards: 18 }] },
-        fresno_sit_L: { name: "Fresno Sit", steps: [{ type: 'break', angle: 60, yards: 10 }, { type: 'break', angle: 135, yards: 3 }] },
+        fresno_sit_L: { name: "Fresno Sit", steps: [{ type: 'break', angle: 55, yards: 17 }, { type: 'break', angle: 135, yards: 3 }] },
         fresno_drag_L: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 15 }] }, // Shortened
         fresno_go_R: { name: "Fresno Go", steps: [{ type: 'release', angle: 20, yards: 3 }, { type: 'stem', yards: 18 }] },
-        fresno_sit_R: { name: "Fresno Sit", steps: [{ type: 'break', angle: -60, yards: 10 }, { type: 'break', angle: -135, yards: 3 }] },
+        fresno_sit_R: { name: "Fresno Sit", steps: [{ type: 'break', angle: -55, yards: 17 }, { type: 'break', angle: -135, yards: 3 }] },
         fresno_drag_R: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 15 }] }, // Shortened
 
         // Yale (Screen Left) Routes
