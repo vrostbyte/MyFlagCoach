@@ -220,6 +220,11 @@ const App = ({ initialPlaybook }) => {
                 }
             });
         }
+        
+        // New rule: If formation is Bunch, remove Fresno concept.
+        if (selectedFormation === 'Bunch' && availableConcepts['Fresno']) {
+            delete availableConcepts['Fresno'];
+        }
 
         if (Object.keys(availableConcepts).length === 0) return null;
         

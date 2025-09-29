@@ -58,16 +58,16 @@ const playbook = {
     },
     formations: {
         "Trips": {
-            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 1, "players": ["Z"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
+            "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 1, "players": ["Z"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 90, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "F", "Y"] } } }
         },
         "Divide": {
-            "Lt": { "positions": { "X": { x: -250, y: 0 }, "Y": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "Y"] }, "right": { "count": 2, "players": ["Z", "F"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "F"] }, "right": { "count": 2, "players": ["Z", "Y"] } } }
+            "Lt": { "positions": { "X": { x: -250, y: 0 }, "Y": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "F": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "Y"] }, "right": { "count": 2, "players": ["Z", "F"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 2, "players": ["X", "F"] }, "right": { "count": 2, "players": ["Z", "Y"] } } }
         },
         "Bunch": {
-            "Lt": { "positions": { "X": { x: -230, y: 0 }, "Y": { x: -160, y: 0 }, "F": { x: -195, y: -20 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "Y", "F"] }, "right": { "count": 1, "players": ["Z"] } } },
-            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 160, y: 0 }, "F": { x: 195, y: -20 }, "Z": { x: 230, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "Y", "F"] } } }
+            "Lt": { "positions": { "X": { x: -230, y: 0 }, "Y": { x: -160, y: 0 }, "F": { x: -195, y: -20 }, "C": { x: 0, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: -70, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "Y", "F"] }, "right": { "count": 1, "players": ["Z"] } } },
+            "Rt": { "positions": { "X": { x: -250, y: 0 }, "C": { x: 0, y: 0 }, "Y": { x: 160, y: 0 }, "F": { x: 195, y: -20 }, "Z": { x: 230, y: 0 }, "Q": { x: 0, y: 40 }, "H": { x: 70, y: 40 } }, "sides": { "left": { "count": 1, "players": ["X"] }, "right": { "count": 3, "players": ["Z", "Y", "F"] } } }
         },
         "Empty": {
             "Lt": { "positions": { "X": { x: -250, y: 0 }, "F": { x: -170, y: 0 }, "Y": { x: -90, y: 0 }, "C": { x: 0, y: 0 }, "H": { x: 170, y: 0 }, "Z": { x: 250, y: 0 }, "Q": { x: 0, y: 40 } }, "sides": { "left": { "count": 3, "players": ["X", "F", "Y"] }, "right": { "count": 2, "players": ["Z", "H"] } } },
