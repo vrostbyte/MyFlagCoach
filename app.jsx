@@ -313,6 +313,65 @@ const SavedPlaysPanel = ({ savedPlays, onSelect, onDelete, activeSavedPlay }) =>
 };
 
 // =============================================
+// GAME SITUATIONS PANEL
+// =============================================
+const SituationsPanel = ({ situations, onSelectPlay, activeSituation, onSelectSituation }) => {
+    return (
+        <div className="space-y-3">
+            {/* Situation Chips */}
+            <div className="grid grid-cols-2 gap-2">
+                {Object.entries(situations).map(([name, sit]) => (
+                    <button key={name}
+                        onClick={() => onSelectSituation(name)}
+                        className={`py-3 px-3 rounded-xl text-sm font-bold transition-all active:scale-95 text-left ${
+                            activeSituation === name
+                                ? 'ring-2 ring-white text-white'
+                                : 'text-white hover:brightness-110'
+                        }`}
+                        style={{
+                            backgroundColor: activeSituation === name ? sit.color : `${sit.color}33`,
+                            borderLeft: `4px solid ${sit.color}`
+                        }}>
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-black opacity-60">{sit.icon}</span>
+                            <span className="truncate">{name}</span>
+                        </div>
+                    </button>
+                ))}
+            </div>
+
+            {/* Recommended Plays for selected situation */}
+            {activeSituation && situations[activeSituation] && (
+                <div className="space-y-2 mt-2">
+                    <div className="px-1">
+                        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                            {activeSituation}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {situations[activeSituation].description}
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        {situations[activeSituation].recommendedPlays.map((play, idx) => (
+                            <button key={idx}
+                                onClick={() => onSelectPlay(play)}
+                                className="w-full text-left bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-xl px-4 py-3 transition-all active:scale-[0.98]">
+                                <div className="font-semibold text-white text-sm">{play.label}</div>
+                                <div className="text-xs text-gray-400 mt-0.5">
+                                    {play.formation} {play.strength}
+                                    {play.fullField ? ` — ${play.fullField}` :
+                                        ` — ${[play.left, play.right].filter(Boolean).join(' / ')}`}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// =============================================
 // MAIN APP COMPONENT
 // =============================================
 const App = ({ initialPlaybook }) => {
@@ -332,7 +391,8 @@ const App = ({ initialPlaybook }) => {
         } catch { return []; }
     });
     const [activeSavedPlay, setActiveSavedPlay] = useState(null);
-    const [activeTab, setActiveTab] = useState('playbook'); // 'playbook' or 'custom'
+    const [activeTab, setActiveTab] = useState('playbook'); // 'playbook', 'custom', or 'situations'
+    const [activeSituation, setActiveSituation] = useState(null);
 
     // Persist custom plays to localStorage
     useEffect(() => {
@@ -462,6 +522,7 @@ const App = ({ initialPlaybook }) => {
         setFullFieldPlay(null);
         setActiveModifiers([]);
         setActiveSavedPlay(null);
+        setActiveSituation(null);
     }, []);
 
     const handleFormationSelect = useCallback(name => {
@@ -529,6 +590,32 @@ const App = ({ initialPlaybook }) => {
         setFullFieldPlay(null);
         setActiveModifiers([]);
         setActiveSavedPlay(prev => prev === idx ? null : idx);
+    }, []);
+
+    const handleSelectSituation = useCallback((name) => {
+        setActiveSituation(prev => prev === name ? null : name);
+    }, []);
+
+    const handleSituationPlaySelect = useCallback((play) => {
+        // Auto-configure the playbook controls from the recommended play
+        setActiveSavedPlay(null);
+        setActiveModifiers([]);
+
+        setSelectedFormation(play.formation);
+        setSelectedStrength(play.strength);
+
+        if (play.fullField) {
+            setLeftConcept(null);
+            setRightConcept(null);
+            setFullFieldPlay(play.fullField);
+        } else {
+            setFullFieldPlay(null);
+            setLeftConcept(play.left || null);
+            setRightConcept(play.right || null);
+        }
+
+        // On mobile, switch to field view after selecting
+        setShowControls(false);
     }, []);
 
     // --- RENDER HELPERS ---
@@ -623,6 +710,14 @@ const App = ({ initialPlaybook }) => {
                             }`}>
                             Playbook
                         </button>
+                        <button onClick={() => setActiveTab('situations')}
+                            className={`flex-1 py-3 text-sm font-bold transition-colors ${
+                                activeTab === 'situations'
+                                    ? 'text-orange-400 border-b-2 border-orange-400'
+                                    : 'text-gray-400 hover:text-gray-200'
+                            }`}>
+                            Situations
+                        </button>
                         <button onClick={() => setActiveTab('custom')}
                             className={`flex-1 py-3 text-sm font-bold transition-colors ${
                                 activeTab === 'custom'
@@ -634,7 +729,14 @@ const App = ({ initialPlaybook }) => {
                     </div>
 
                     <div className="p-4 space-y-4 flex-1">
-                        {activeTab === 'playbook' ? (
+                        {activeTab === 'situations' ? (
+                            <SituationsPanel
+                                situations={currentPlaybook.situations}
+                                onSelectPlay={handleSituationPlaySelect}
+                                activeSituation={activeSituation}
+                                onSelectSituation={handleSelectSituation}
+                            />
+                        ) : activeTab === 'playbook' ? (
                             <>
                                 {/* Step 1: Formation */}
                                 <div className="space-y-2">

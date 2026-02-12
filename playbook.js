@@ -125,5 +125,95 @@ const playbook = {
     modifiers: {
         "Max": { type: "positional", player: "F", assignment: "block", position: "mirrorH" },
         "Tight": { type: "formationCompression", spacing: 60 }
+    },
+    situations: {
+        "1st & 20": {
+            description: "Opening play — take a shot or establish the run game",
+            icon: "1",
+            color: "#3b82f6",
+            recommendedPlays: [
+                { label: "Trips Lt Houston / Go", formation: "Trips", strength: "Lt", left: "Houston", right: "Go" },
+                { label: "Divide Lt Dallas / Scissors", formation: "Divide", strength: "Lt", left: "Dallas", right: "Scissors" },
+                { label: "Trips Rt Fresno", formation: "Trips", strength: "Rt", left: null, right: "Fresno" },
+                { label: "Bunch Lt Spacing / Go", formation: "Bunch", strength: "Lt", left: "Spacing", right: "Go" },
+            ]
+        },
+        "2nd & Long": {
+            description: "10+ yards to go — need chunk yardage",
+            icon: "2L",
+            color: "#8b5cf6",
+            recommendedPlays: [
+                { label: "Trips Lt Fresno", formation: "Trips", strength: "Lt", left: "Fresno", right: null },
+                { label: "Divide Lt Dallas / Dallas", formation: "Divide", strength: "Lt", left: "Dallas", right: "Dallas" },
+                { label: "Trips Rt Houston / Slant", formation: "Trips", strength: "Rt", left: "Slant", right: "Houston" },
+                { label: "Empty Lt Yale Screen", formation: "Empty", strength: "Lt", fullField: "Yale" },
+            ]
+        },
+        "2nd & Short": {
+            description: "Under 5 yards — safe high-percentage plays",
+            icon: "2S",
+            color: "#10b981",
+            recommendedPlays: [
+                { label: "Trips Lt Houston / Houston", formation: "Trips", strength: "Lt", left: "Houston", right: "Houston" },
+                { label: "Divide Rt Houston / Houston", formation: "Divide", strength: "Rt", left: "Houston", right: "Houston" },
+                { label: "Bunch Rt Spacing / Slant", formation: "Bunch", strength: "Rt", left: "Slant", right: "Spacing" },
+                { label: "Trips Lt Fresno", formation: "Trips", strength: "Lt", left: "Fresno", right: null },
+            ]
+        },
+        "3rd & Long": {
+            description: "Must-convert — need 10+ yards",
+            icon: "3L",
+            color: "#ef4444",
+            recommendedPlays: [
+                { label: "Trips Lt Fresno", formation: "Trips", strength: "Lt", left: "Fresno", right: null },
+                { label: "Divide Lt Scissors / Dallas", formation: "Divide", strength: "Lt", left: "Scissors", right: "Dallas" },
+                { label: "Empty Rt Harvard Screen", formation: "Empty", strength: "Rt", fullField: "Harvard" },
+                { label: "Trips Rt Houston / In", formation: "Trips", strength: "Rt", left: "In", right: "Houston" },
+            ]
+        },
+        "3rd & Short": {
+            description: "Manageable conversion — under 5 yards",
+            icon: "3S",
+            color: "#f59e0b",
+            recommendedPlays: [
+                { label: "Trips Lt Houston / Slant", formation: "Trips", strength: "Lt", left: "Houston", right: "Slant" },
+                { label: "Divide Lt Houston / Houston", formation: "Divide", strength: "Lt", left: "Houston", right: "Houston" },
+                { label: "Bunch Lt Spacing / Houston", formation: "Bunch", strength: "Lt", left: "Spacing", right: "Houston" },
+                { label: "Divide Rt Stupid", formation: "Divide", strength: "Rt", fullField: "Stupid Rt" },
+            ]
+        },
+        "4th Down": {
+            description: "Do or die — go for it or get creative",
+            icon: "4",
+            color: "#dc2626",
+            recommendedPlays: [
+                { label: "Empty Lt Yale Screen", formation: "Empty", strength: "Lt", fullField: "Yale" },
+                { label: "Divide Lt Stupid", formation: "Divide", strength: "Lt", fullField: "Stupid Lt" },
+                { label: "Trips Lt Fresno", formation: "Trips", strength: "Lt", left: "Fresno", right: null },
+                { label: "Bunch Rt Spacing / Go", formation: "Bunch", strength: "Rt", left: "Go", right: "Spacing" },
+            ]
+        },
+        "Red Zone": {
+            description: "Inside the 10 — compressed field, score now",
+            icon: "RZ",
+            color: "#e11d48",
+            recommendedPlays: [
+                { label: "Bunch Lt Spacing / Slant", formation: "Bunch", strength: "Lt", left: "Spacing", right: "Slant" },
+                { label: "Trips Rt Houston / Out", formation: "Trips", strength: "Rt", left: "Out", right: "Houston" },
+                { label: "Divide Lt Dallas / Scissors", formation: "Divide", strength: "Lt", left: "Dallas", right: "Scissors" },
+                { label: "Empty Rt Harvard Screen", formation: "Empty", strength: "Rt", fullField: "Harvard" },
+            ]
+        },
+        "2-Minute Drill": {
+            description: "Clock is running — quick plays, get out of bounds",
+            icon: "2M",
+            color: "#f97316",
+            recommendedPlays: [
+                { label: "Trips Lt Houston / Out", formation: "Trips", strength: "Lt", left: "Houston", right: "Out" },
+                { label: "Divide Lt Out / Out", formation: "Divide", strength: "Lt", left: "Out", right: "Out" },
+                { label: "Empty Lt Yale Screen", formation: "Empty", strength: "Lt", fullField: "Yale" },
+                { label: "Trips Rt Fresno", formation: "Trips", strength: "Rt", left: null, right: "Fresno" },
+            ]
+        }
     }
 };
