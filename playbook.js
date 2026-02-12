@@ -2,8 +2,9 @@
  * MyFlagCoach Playbook - Project Phoenix
  * This file defines the global 'playbook' variable.
  * It contains all formations, routes, concepts, and modifiers for the app.
- * The coordinate system is now vertical: X is horizontal, Y is vertical depth.
- * Line of Scrimmage is at Y = 0.
+ * The coordinate system is vertical: X is horizontal, Y is vertical depth.
+ * Line of Scrimmage is at Y = 0. Negative Y is downfield (toward the defense).
+ * Positive Y is behind the line (toward the offense's own end zone).
  */
 
 const playbook = {
@@ -14,47 +15,68 @@ const playbook = {
         block: { name: "Block", steps: [] },
         swingR: { name: "Swing Right", steps: [{ type: 'swing', direction: 'right' }] },
         swingL: { name: "Swing Left", steps: [{ type: 'swing', direction: 'left' }] },
-        
-        // --- CORRECTED & NEW ROUTES ---
-        
+
+        // Basic Routes (used by 1-Man concepts and Spacing)
+        slant_L: { name: "Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: 45, yards: 12 }] },
+        slant_R: { name: "Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: -45, yards: 12 }] },
+        in_L: { name: "In/Dig", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 90, yards: 10 }] },
+        in_R: { name: "In/Dig", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -90, yards: 10 }] },
+        out_L: { name: "Out", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: -90, yards: 8 }] },
+        out_R: { name: "Out", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: 90, yards: 8 }] },
+        flat_L: { name: "Flat", steps: [{ type: 'break', angle: -60, yards: 6 }] },
+        flat_R: { name: "Flat", steps: [{ type: 'break', angle: 60, yards: 6 }] },
+        comeback_L: { name: "Comeback", steps: [{ type: 'stem', yards: 12 }, { type: 'break', angle: -160, yards: 3 }] },
+        comeback_R: { name: "Comeback", steps: [{ type: 'stem', yards: 12 }, { type: 'break', angle: 160, yards: 3 }] },
+        post_L: { name: "Post", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: 45, yards: 12 }] },
+        post_R: { name: "Post", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: -45, yards: 12 }] },
+        corner_L: { name: "Corner", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: -45, yards: 12 }] },
+        corner_R: { name: "Corner", steps: [{ type: 'stem', yards: 8 }, { type: 'break', angle: 45, yards: 12 }] },
+        drag_L: { name: "Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 18 }] },
+        drag_R: { name: "Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 18 }] },
+        curl_L: { name: "Curl", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 160, yards: 2 }] },
+        curl_R: { name: "Curl", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -160, yards: 2 }] },
+        wheel_L: { name: "Wheel", steps: [{ type: 'break', angle: -60, yards: 4 }, { type: 'break', angle: 0, yards: 18 }] },
+        wheel_R: { name: "Wheel", steps: [{ type: 'break', angle: 60, yards: 4 }, { type: 'break', angle: 0, yards: 18 }] },
+
+        // Hitch Routes (Houston concept)
+        hitch_6yd_L: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 135, yards: 2 }] },
+        hitch_6yd_R: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -135, yards: 2 }] },
+
         // Dallas Routes
         dallas_slant_L: { name: "Dallas Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: 45, yards: 15 }] },
         dallas_slant_R: { name: "Dallas Slant", steps: [{ type: 'stem', yards: 3 }, { type: 'break', angle: -45, yards: 15 }] },
         dallas_now_L: { name: "Dallas Now", steps: [{ type: 'break', angle: 25, yards: 18 }] },
         dallas_now_R: { name: "Dallas Now", steps: [{ type: 'break', angle: -25, yards: 18 }] },
 
+        // Scissors Routes
+        scissors_post_L: { name: "Scissors Post", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 45, yards: 8 }] },
+        scissors_corner_L: { name: "Scissors Corner", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -45, yards: 8 }] },
+        scissors_post_R: { name: "Scissors Post", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -45, yards: 8 }] },
+        scissors_corner_R: { name: "Scissors Corner", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 45, yards: 8 }] },
+
         // Fresno Routes
         fresno_go_L: { name: "Fresno Go", steps: [{ type: 'release', angle: -20, yards: 3 }, { type: 'stem', yards: 18 }] },
         fresno_sit_L: { name: "Fresno Sit", steps: [{ type: 'break', angle: 55, yards: 17 }, { type: 'break', angle: 135, yards: 3 }] },
-        fresno_drag_L: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 15 }] }, // Shortened
+        fresno_drag_L: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'left', yards: 15 }] },
         fresno_go_R: { name: "Fresno Go", steps: [{ type: 'release', angle: 20, yards: 3 }, { type: 'stem', yards: 18 }] },
         fresno_sit_R: { name: "Fresno Sit", steps: [{ type: 'break', angle: -55, yards: 17 }, { type: 'break', angle: -135, yards: 3 }] },
-        fresno_drag_R: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 15 }] }, // Shortened
+        fresno_drag_R: { name: "Fresno Drag", steps: [{ type: 'stem', yards: 2 }, { type: 'drag', direction: 'right', yards: 15 }] },
 
         // Yale (Screen Left) Routes
         yale_bubble: { name: "Yale Bubble", steps: [{ type: 'break', angle: -135, yards: 4 }] },
         yale_blocker: { name: "Yale Blocker", steps: [{ type: 'release', angle: -45, yards: 4 }, { type: 'break', angle: -135, yards: 8 }] },
         yale_clearout: { name: "Yale Clearout", steps: [{ type: 'break', angle: 20, yards: 20 }] },
-        
+
         // Harvard (Screen Right) Routes
         harvard_bubble: { name: "Harvard Bubble", steps: [{ type: 'break', angle: 135, yards: 4 }] },
         harvard_blocker: { name: "Harvard Blocker", steps: [{ type: 'release', angle: 45, yards: 4 }, { type: 'break', angle: 135, yards: 8 }] },
         harvard_clearout: { name: "Harvard Clearout", steps: [{ type: 'break', angle: -20, yards: 20 }] },
 
         // Stupid Routes
-        stupid_out_5yd_L: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: -90, yards: 8 }] }, // Shortened
+        stupid_out_5yd_L: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: -90, yards: 8 }] },
         stupid_corner_6yd_L: { name: "6yd Corner", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -45, yards: 12 }] },
-        stupid_out_5yd_R: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: 90, yards: 8 }] }, // Shortened
+        stupid_out_5yd_R: { name: "5yd Out", steps: [{ type: 'stem', yards: 5 }, { type: 'break', angle: 90, yards: 8 }] },
         stupid_corner_6yd_R: { name: "6yd Corner", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 45, yards: 12 }] },
-
-        // --- EXISTING ROUTES ---
-        hitch_6yd_L: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: 135, yards: 2 }] },
-        hitch_6yd_R: { name: "6yd Hitch", steps: [{ type: 'stem', yards: 6 }, { type: 'break', angle: -135, yards: 2 }] },
-        
-        scissors_post_L: { name: "Scissors Post", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 45, yards: 8 }] },
-        scissors_corner_L: { name: "Scissors Corner", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -45, yards: 8 }] },
-        scissors_post_R: { name: "Scissors Post", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: -45, yards: 8 }] },
-        scissors_corner_R: { name: "Scissors Corner", steps: [{ type: 'stem', yards: 10 }, { type: 'break', angle: 45, yards: 8 }] },
     },
     formations: {
         "Trips": {
@@ -78,16 +100,20 @@ const playbook = {
         "1Man": {
             "Go": { assignments: { "0": "go" } },
             "Houston": { assignments: { "0": "hitch_6yd" } },
+            "Slant": { assignments: { "0": "slant" } },
+            "In": { assignments: { "0": "in" } },
+            "Out": { assignments: { "0": "out" } },
+            "Comeback": { assignments: { "0": "comeback" } },
         },
         "2Man": {
             "Houston": { assignments: { "0": "hitch_6yd", "1": "hitch_6yd" } },
-            "Dallas": { assignments: { "0": "dallas_slant", "1": "dallas_now" } }, // Corrected
-            "Scissors": { assignments: { "0": "scissors_post", "1": "scissors_corner" } }
+            "Dallas": { assignments: { "0": "dallas_slant", "1": "dallas_now" } },
+            "Scissors": { assignments: { "0": "scissors_post", "1": "scissors_corner" } },
         },
         "3Man": {
             "Houston": { assignments: { "0": "hitch_6yd", "1": "hitch_6yd", "2": "hitch_6yd" } },
             "Fresno": { usesCenter: true, assignments: { "0": "fresno_go", "1": "fresno_sit", "2": "fresno_drag" } },
-            "Spacing": { formation: "Bunch", assignments: { "0": "hitch_6yd", "1": "flat", "2": "slant" } }
+            "Spacing": { formation: "Bunch", assignments: { "0": "hitch_6yd", "1": "flat", "2": "slant" } },
         },
         "fullField": {
             "Yale": { name: "Yale Screen", formation: "Empty Lt", assignments: { "X": "yale_bubble", "F": "yale_blocker", "Y": "yale_blocker", "Z": "yale_clearout", "H": "yale_clearout", "C": "block", "Q": "block" } },
@@ -101,4 +127,3 @@ const playbook = {
         "Tight": { type: "formationCompression", spacing: 60 }
     }
 };
-

@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MyFlagCoach - Project Phoenix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1f2937">
+    <title>MyFlagCoach</title>
     <!-- Core Libraries -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -14,12 +18,12 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-gray-900">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- 
-      SCRIPT LOADING ORDER IS CRITICAL HERE:
+    <!--
+      SCRIPT LOADING ORDER IS CRITICAL:
       1. Load the playbook data first, making the 'playbook' variable globally available.
       2. Load the main app component, which depends on React, ReactDOM, and the playbook data.
     -->
@@ -27,4 +31,3 @@
     <script type="text/babel" src="./app.jsx"></script>
 </body>
 </html>
-
