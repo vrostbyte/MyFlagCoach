@@ -1,29 +1,57 @@
-/* style.css */
+/* style.css - MyFlagCoach */
 
-/* Ensures the app takes up the full screen, especially on mobile devices */
+/* Full screen layout */
 html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Custom scrollbar styling for a cleaner look in the control panel */
+/* Safe area support for notched devices */
+.safe-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+/* Prevent pull-to-refresh and overscroll on mobile */
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+/* Custom scrollbar for control panel */
 .control-panel::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .control-panel::-webkit-scrollbar-track {
-  background: #2d3748; /* bg-gray-800 */
+  background: transparent;
 }
 
 .control-panel::-webkit-scrollbar-thumb {
-  background: #4a5568; /* bg-gray-700 */
+  background: #4a5568;
   border-radius: 4px;
 }
 
 .control-panel::-webkit-scrollbar-thumb:hover {
-  background: #718096; /* bg-gray-600 */
+  background: #718096;
 }
 
+/* Active press feedback for buttons */
+button:active {
+  transform: scale(0.97);
+}
+
+/* Select dropdown styling for dark theme */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
